@@ -1,6 +1,6 @@
 # AI-Powered Airport Weather Crisis Management System
 
-Airport Operations Control Center (AOCC) dashboard for monitoring airport weather, classifying operational crisis levels, and receiving AI operational recommendations.
+Airport Operations Control Center (AOCC) dashboard for monitoring airport weather, classifying operational crisis levels, generating weather alerts, assessing operational impact, and supporting AOCC decision-making.
 
 This is **not** a consumer weather app. It is a single FastAPI application that serves both the APIs and the dashboard UI.
 
@@ -33,21 +33,19 @@ API docs:
 ```
 weather-crisis-management/
 ├── backend/
-│   ├── main.py              # FastAPI app (static + templates + APIs)
-│   ├── config.py            # Settings from .env
-│   ├── weather.py           # Weather providers (mock / Tomorrow.io stub)
-│   ├── severity.py          # Operational severity engine
-│   ├── rag.py               # RAG placeholders only
-│   ├── schemas.py           # API envelopes & request models
-│   ├── models.py            # Domain models
-│   ├── routes/              # HTTP routers
-│   └── services/            # Business orchestration
+│   ├── main.py                 # FastAPI app (static + templates + APIs)
+│   ├── config.py               # Settings from .env
+│   ├── weather.py              # Mock + Tomorrow.io providers
+│   ├── severity.py             # Operational severity Levels 1–3
+│   ├── alert_engine.py         # Phase 4 weather alert evaluation
+│   ├── rag.py                  # RAG placeholders
+│   ├── schemas.py / models.py
+│   ├── routes/                 # HTTP routers
+│   └── services/               # weather, severity, alert, impact, notification, rag
 ├── frontend/
 │   ├── templates/index.html
 │   └── static/{css,js,images}
-├── documents/               # Future SOP corpus
-├── uploads/                 # Uploaded docs (not indexed yet)
-├── vectorstore/             # Future FAISS index
+├── documents/ uploads/ vectorstore/
 ├── .env
 ├── requirements.txt
 └── README.md
@@ -59,8 +57,12 @@ weather-crisis-management/
 |--------|------|-------------|
 | GET | `/` | AOCC dashboard |
 | GET | `/health` | Health check |
-| GET | `/api/weather` | Current airport weather (mock) |
+| GET | `/api/weather` | Live airport weather (Tomorrow.io / mock failover) |
 | GET | `/api/severity` | Operational severity Level 1–3 |
+| GET | `/api/alerts/current` | Current weather alert + checklist + trends |
+| GET | `/api/alerts/history` | Runtime alert history (newest first) |
+| GET | `/api/operations/impact` | AOCC operational impact assessment |
+| GET | `/api/notifications` | Notification timeline (newest first) |
 | POST | `/api/chat` | AOCC AI assistant (mock) |
 | POST | `/api/upload` | Store document for future RAG |
 
@@ -74,30 +76,60 @@ Every API response uses:
 }
 ```
 
+## Phase 4 — Weather Alert & Incident Management
+
+### Architecture
+
+```
+Live Weather (Tomorrow.io)
+        │
+        ▼
+ AlertService ──► Alert Engine (NORMAL / WATCH / WARNING / CRITICAL)
+        │
+        ├──► NotificationService (timeline feed)
+        ├──► Alert History (in-memory, session runtime)
+        └──► ImpactService (arrivals / runway / ground / passengers)
+```
+
+### Alert Engine
+
+Evaluates **live** observation fields:
+
+- Visibility, Temperature, Wind Speed, Rainfall, Humidity, Weather Description
+- Condition detectors: Fog, Thunderstorm, Heavy Rain, Strong Wind, Heat
+
+Each alert includes: Title, Description, Severity, Affected Operations, Recommended AOCC Action, Checklist, Timestamp, Status (`ACTIVE` / `CLEARED`).
+
+### Operational Impact Logic
+
+Maps the primary alert severity (and refined weather thresholds) to statuses such as:
+
+- Arrival / Departure: `NORMAL` · `MONITOR` · `REDUCED` · `SEVERELY REDUCED`
+- Runway: `OPEN` · `LIMITED` · `TEMPORARILY RESTRICTED`
+- Taxiway / Ground / Passenger processing impact labels
+
+### Dashboard Phase 4 panels
+
+- Active Weather Alert card (animated, color-coded)
+- Operational Impact panel
+- Structured AOCC action checklist
+- Notification feed
+- Weather trend indicators (vs previous observation)
+- Alert history table
+
+Weather auto-refresh remains **every 30 minutes** (`WEATHER_REFRESH_INTERVAL`).
+
 ## Configuration (`.env`)
 
 | Variable | Purpose |
 |----------|---------|
-| `HOST` | Bind host (default `0.0.0.0`) |
+| `HOST` | Bind host |
 | `PORT` | Bind port (default `8000`) |
-| `DEBUG` | Debug / reload friendly mode |
-| `WEATHER_API_KEY` | Reserved for Tomorrow.io |
+| `DEBUG` | Debug mode |
+| `WEATHER_API_KEY` | Tomorrow.io API key |
 | `GEMINI_API_KEY` | Reserved for Google Gemini |
-| `WEATHER_PROVIDER` | `mock` (default) |
+| `WEATHER_PROVIDER` | `tomorrow` or `mock` |
 | `CHAT_PROVIDER` | `mock` (default) |
-
-## Phase 1 scope
-
-- Mock weather for **Delhi IGI Airport (VIDP)**
-- Severity engine Levels **1 / 2 / 3**
-- Mock AOCC chatbot
-- RAG folders + interfaces only (no embeddings / FAISS / LLM)
-
-## Future integration points
-
-1. **Tomorrow.io** — implement `TomorrowIOWeatherProvider` in `backend/weather.py` and set `WEATHER_PROVIDER=tomorrow_io`. Frontend unchanged.
-2. **Gemini + LangChain** — replace `MockChatProvider` in `backend/services/rag_service.py` and set `CHAT_PROVIDER=gemini`.
-3. **RAG** — implement ingest/search in `backend/rag.py` using Sentence Transformers + FAISS under `vectorstore/`.
 
 ## Airport defaults
 

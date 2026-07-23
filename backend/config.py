@@ -13,9 +13,6 @@ DOCUMENTS_DIR = BASE_DIR / "documents"
 UPLOADS_DIR = BASE_DIR / "uploads"
 VECTORSTORE_DIR = BASE_DIR / "vectorstore"
 
-print("BASE_DIR =", BASE_DIR)
-print("TEMPLATES_DIR =", TEMPLATES_DIR)
-
 
 class Settings(BaseSettings):
     """Runtime settings for the AOCC application."""

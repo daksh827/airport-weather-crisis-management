@@ -3,7 +3,9 @@
  */
 
 import { getHealth } from "./api.js";
+import { loadAlerts } from "./alerts.js";
 import { initChatbot } from "./chatbot.js";
+import { loadNotifications, loadOperationsImpact } from "./operations.js";
 import { initSeverityControls, loadSeverity } from "./severity.js";
 import { initWeatherControls, loadWeather } from "./weather.js";
 
@@ -68,9 +70,6 @@ function setGlobalAlert(message) {
   alertEl.textContent = message;
 }
 
-/**
- * Ping /health and update status indicators.
- */
 async function refreshHealth() {
   try {
     const response = await getHealth();
@@ -88,11 +87,14 @@ async function refreshHealth() {
 }
 
 /**
- * Refresh weather + severity together so the dashboard stays coherent.
+ * Refresh weather, severity, and Phase 4 operational modules.
  */
 async function refreshOperationalPanels() {
   const weather = await loadWeather();
   const severity = await loadSeverity();
+  await loadAlerts();
+  await loadOperationsImpact();
+  await loadNotifications();
 
   if (!weather && !severity) {
     setGlobalAlert(
@@ -118,9 +120,15 @@ async function bootstrap() {
   initChatbot();
   initWeatherControls(async () => {
     await loadSeverity();
+    await loadAlerts();
+    await loadOperationsImpact();
+    await loadNotifications();
     refreshDeadline = Date.now() + WEATHER_REFRESH_INTERVAL;
   });
-  initSeverityControls(() => {
+  initSeverityControls(async () => {
+    await loadAlerts();
+    await loadOperationsImpact();
+    await loadNotifications();
     refreshDeadline = Date.now() + WEATHER_REFRESH_INTERVAL;
   });
 

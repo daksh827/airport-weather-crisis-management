@@ -65,6 +65,24 @@ export async function getSeverity(icao) {
   return apiRequest(`/api/severity${query}`);
 }
 
+export async function getCurrentAlert(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/alerts/current${query}`);
+}
+
+export async function getAlertHistory(limit = 50) {
+  return apiRequest(`/api/alerts/history?limit=${encodeURIComponent(limit)}`);
+}
+
+export async function getOperationsImpact(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/operations/impact${query}`);
+}
+
+export async function getNotifications(limit = 30) {
+  return apiRequest(`/api/notifications?limit=${encodeURIComponent(limit)}`);
+}
+
 /**
  * @param {string} message
  * @param {string|null} [sessionId]

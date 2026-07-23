@@ -193,12 +193,53 @@
         </div>
       </section>
 
+      <!-- Active Weather Alert -->
+      <section class="panel active-alert-panel" aria-labelledby="active-alert-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Incident Management</p>
+            <h2 id="active-alert-heading">Active Weather Alert</h2>
+          </div>
+          <span class="badge" id="active-alert-badge">NORMAL</span>
+        </div>
+        <div class="active-alert-card" id="active-alert-card">
+          <div class="active-alert-icon" id="active-alert-icon" aria-hidden="true">🟢</div>
+          <div class="active-alert-body">
+            <h3 id="active-alert-title">🟢 Normal Operations</h3>
+            <p id="active-alert-description">Evaluating live weather…</p>
+            <div class="active-alert-meta">
+              <div><span class="field-label">Alert Level</span><span id="active-alert-level">NORMAL</span></div>
+              <div><span class="field-label">Status</span><span id="active-alert-status">ACTIVE</span></div>
+              <div><span class="field-label">Time Generated</span><span class="mono" id="active-alert-time">—</span></div>
+            </div>
+            <p class="active-alert-ops"><strong>Affected:</strong> <span id="active-alert-ops">—</span></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Weather Trends -->
+      <section class="panel trends-panel" aria-labelledby="trends-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Observation Delta</p>
+            <h2 id="trends-heading">Weather Trends</h2>
+          </div>
+        </div>
+        <div class="trend-grid">
+          <article class="trend-card"><span class="trend-label">Temperature</span><span class="trend-value" id="trend-temp">→</span></article>
+          <article class="trend-card"><span class="trend-label">Wind</span><span class="trend-value" id="trend-wind">→</span></article>
+          <article class="trend-card"><span class="trend-label">Visibility</span><span class="trend-value" id="trend-visibility">Stable</span></article>
+          <article class="trend-card"><span class="trend-label">Humidity</span><span class="trend-value" id="trend-humidity">→</span></article>
+        </div>
+        <p class="trend-summary" id="trend-summary">Awaiting comparative observation.</p>
+      </section>
+
       <!-- AOCC Recommendations -->
       <section class="panel recommendations-panel" aria-labelledby="reco-heading">
         <div class="panel-header">
           <div>
             <p class="panel-kicker">Decision Support</p>
-            <h2 id="reco-heading">AOCC Recommendations</h2>
+            <h2 id="reco-heading">AOCC Recommended Actions</h2>
           </div>
           <span class="badge badge-muted" id="reco-level-badge">LEVEL —</span>
         </div>
@@ -214,10 +255,74 @@
           <article class="reco-card reco-card-action">
             <div class="reco-card-head">
               <span class="reco-index">02</span>
-              <h3>Recommended Action</h3>
+              <h3>Action Checklist</h3>
             </div>
-            <p id="severity-action">Waiting for severity assessment…</p>
+            <ul class="aocc-checklist" id="aocc-checklist">
+              <li><span class="check-mark">✔</span><span>Waiting for alert engine…</span></li>
+            </ul>
+            <p id="severity-action" class="sr-only">Waiting for severity assessment…</p>
           </article>
+        </div>
+      </section>
+
+      <!-- Operational Impact -->
+      <section class="panel operations-panel" id="operations-panel" aria-labelledby="ops-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">AOCC Operations</p>
+            <h2 id="ops-heading">Operational Impact</h2>
+          </div>
+          <span class="impact-overall ok" id="impact-overall">—</span>
+        </div>
+        <div class="impact-grid">
+          <article class="impact-card"><span class="impact-label">Arrival Operations</span><span class="impact-value" id="impact-arrival">—</span></article>
+          <article class="impact-card"><span class="impact-label">Departure Operations</span><span class="impact-value" id="impact-departure">—</span></article>
+          <article class="impact-card"><span class="impact-label">Runway Operations</span><span class="impact-value" id="impact-runway-ops">—</span></article>
+          <article class="impact-card"><span class="impact-label">Taxiway Visibility</span><span class="impact-value" id="impact-taxiway">—</span></article>
+          <article class="impact-card"><span class="impact-label">Ground Handling</span><span class="impact-value" id="impact-ground">—</span></article>
+          <article class="impact-card"><span class="impact-label">Passenger Processing</span><span class="impact-value" id="impact-passenger">—</span></article>
+          <article class="impact-card"><span class="impact-label">Arrival Rate</span><span class="impact-value" id="impact-arrival-rate">—</span></article>
+          <article class="impact-card"><span class="impact-label">Runway Status</span><span class="impact-value" id="impact-runway-status">—</span></article>
+        </div>
+      </section>
+
+      <!-- Notification Feed -->
+      <section class="panel notifications-panel" aria-labelledby="notif-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Event Timeline</p>
+            <h2 id="notif-heading">Weather Notification Feed</h2>
+          </div>
+        </div>
+        <ul class="notification-feed" id="notification-feed">
+          <li class="feed-empty">Loading notifications…</li>
+        </ul>
+      </section>
+
+      <!-- Alert History -->
+      <section class="panel history-panel" aria-labelledby="history-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Incident Log</p>
+            <h2 id="history-heading">Alert History</h2>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="alert-history-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Alert</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Weather Condition</th>
+                <th>AOCC Action</th>
+              </tr>
+            </thead>
+            <tbody id="alert-history-body">
+              <tr><td colspan="6" class="table-empty">Loading history…</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
