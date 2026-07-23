@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Airport Operations Control Center — Weather Crisis Management" />
+  <title>{{ app_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="aocc-header">
+      <div class="header-brand">
+        <div class="brand-mark" aria-hidden="true">
+          <span class="brand-radar"></span>
+        </div>
+        <div class="brand-text">
+          <p class="brand-eyebrow">Airport Operations Control Center</p>
+          <h1 class="brand-title">Weather Crisis Management</h1>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="meta-block">
+          <span class="meta-label">Airport</span>
+          <span class="meta-value" id="header-airport">{{ airport_icao }} · {{ airport_name }}</span>
+        </div>
+        <div class="meta-block">
+          <span class="meta-label">Location</span>
+          <span class="meta-value" id="header-location">{{ airport_location }}</span>
+        </div>
+        <div class="meta-block">
+          <span class="meta-label">System Clock (UTC)</span>
+          <span class="meta-value mono" id="system-clock">--:--:--</span>
+        </div>
+        <div class="meta-block">
+          <span class="meta-label">Next Refresh</span>
+          <span class="meta-value mono" id="next-refresh">30:00</span>
+        </div>
+        <div class="meta-block status-block">
+          <span class="status-dot" id="connection-dot" aria-hidden="true"></span>
+          <span class="meta-value" id="connection-status">Connecting…</span>
+        </div>
+      </div>
+    </header>
+
+    <div id="global-alert" class="global-alert" hidden role="alert"></div>
+
+    <main class="aocc-main">
+      <!-- Current Weather -->
+      <section class="panel weather-panel" aria-labelledby="weather-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Live Observation</p>
+            <h2 id="weather-heading">Current Weather</h2>
+          </div>
+          <div class="panel-actions">
+            <button type="button" class="btn btn-ghost" id="btn-refresh-weather">Refresh</button>
+            <span class="badge" id="weather-source">—</span>
+            <span class="status-chip" id="weather-status-chip">Idle</span>
+          </div>
+        </div>
+
+        <div class="weather-hero" id="weather-hero">
+          <div class="weather-icon-wrap" id="weather-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" class="wx-icon"><circle cx="32" cy="32" r="14" fill="currentColor" opacity="0.85"/></svg>
+          </div>
+          <div class="weather-primary">
+            <p class="weather-icao" id="weather-icao">{{ airport_icao }}</p>
+            <p class="weather-desc" id="weather-description">Loading observation…</p>
+            <p class="weather-temp">
+              <span id="weather-temperature">--</span><span class="unit">°C</span>
+            </p>
+          </div>
+          <div class="weather-times">
+            <div>
+              <span class="field-label">Observation Time</span>
+              <span class="field-value mono" id="weather-observation-time">—</span>
+            </div>
+            <div>
+              <span class="field-label">Last Updated</span>
+              <span class="field-value mono" id="weather-last-updated">—</span>
+            </div>
+          </div>
+          <div class="panel-loader" id="weather-loader" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Fetching live weather…</span>
+          </div>
+        </div>
+
+        <p class="inline-error" id="weather-error" hidden></p>
+
+        <div class="metric-grid" id="weather-metrics">
+          <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v10.5a3.5 3.5 0 1 0 2 0V3h-2z" fill="currentColor"/></svg>
+            </div>
+            <span class="metric-label">Temperature</span>
+            <span class="metric-value"><span id="weather-temperature-card">--</span><span class="unit">°C</span></span>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2c-3 5-6 8-6 12a6 6 0 1 0 12 0c0-4-3-7-6-12z" fill="currentColor"/></svg>
+            </div>
+            <span class="metric-label">Humidity</span>
+            <span class="metric-value"><span id="weather-humidity">--</span><span class="unit">%</span></span>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 12h16M6 16h12M8 8h8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <span class="metric-label">Pressure</span>
+            <span class="metric-value"><span id="weather-pressure">--</span><span class="unit">hPa</span></span>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M2 12s3-6 10-6 10 6 10 6-3 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+            </div>
+            <span class="metric-label">Visibility</span>
+            <span class="metric-value"><span id="weather-visibility">--</span><span class="unit">m</span></span>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h9a3 3 0 1 1-3 3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <span class="metric-label">Wind Speed</span>
+            <span class="metric-value"><span id="weather-wind-speed">--</span><span class="unit">kt</span></span>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v18M12 3l5 5M12 3L7 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="metric-label">Wind Direction</span>
+            <span class="metric-value" id="weather-wind-direction">--</span>
+          </article>
+          <article class="metric-card metric-card-wide">
+            <div class="metric-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7 16c0 0 1.5 3 5 3s5-3 5-3M6 12c1.5 0 2-.5 3-1.5S11 9 12.5 9 15 10 16 11.5 18 13 19.5 13" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <span class="metric-label">Weather Description</span>
+            <span class="metric-value metric-value-text" id="weather-description-card">—</span>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v10M8 14l4 7 4-7" fill="currentColor"/></svg>
+            </div>
+            <span class="metric-label">Rainfall</span>
+            <span class="metric-value"><span id="weather-rainfall">--</span><span class="unit">mm</span></span>
+          </article>
+        </div>
+      </section>
+
+      <!-- Airport Alert Level -->
+      <section class="panel severity-panel" aria-labelledby="severity-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Operational Impact</p>
+            <h2 id="severity-heading">Airport Alert Level</h2>
+          </div>
+          <div class="panel-actions">
+            <button type="button" class="btn btn-ghost" id="btn-refresh-severity">Reassess</button>
+            <span class="status-chip" id="severity-status-chip">Idle</span>
+          </div>
+        </div>
+
+        <div class="severity-banner" id="severity-banner">
+          <div class="severity-level-badge" id="severity-level-badge">
+            <span class="severity-level-num" id="severity-level">—</span>
+            <span class="severity-level-caption">LEVEL</span>
+          </div>
+          <div class="severity-copy">
+            <div class="severity-title-row">
+              <h3 id="severity-title">Assessing conditions…</h3>
+              <span class="severity-pill" id="severity-pill">STANDBY</span>
+            </div>
+            <p id="severity-description">Severity engine is evaluating current weather.</p>
+          </div>
+          <div class="panel-loader" id="severity-loader" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Assessing operational severity…</span>
+          </div>
+        </div>
+
+        <p class="inline-error" id="severity-error" hidden></p>
+
+        <div class="detail-block factors-block">
+          <h4>Contributing Factors</h4>
+          <ul id="severity-factors" class="factor-list">
+            <li>Awaiting assessment…</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- AOCC Recommendations -->
+      <section class="panel recommendations-panel" aria-labelledby="reco-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Decision Support</p>
+            <h2 id="reco-heading">AOCC Recommendations</h2>
+          </div>
+          <span class="badge badge-muted" id="reco-level-badge">LEVEL —</span>
+        </div>
+
+        <div class="reco-grid">
+          <article class="reco-card">
+            <div class="reco-card-head">
+              <span class="reco-index">01</span>
+              <h3>Operational Guidance</h3>
+            </div>
+            <p id="severity-guidance">Waiting for severity assessment…</p>
+          </article>
+          <article class="reco-card reco-card-action">
+            <div class="reco-card-head">
+              <span class="reco-index">02</span>
+              <h3>Recommended Action</h3>
+            </div>
+            <p id="severity-action">Waiting for severity assessment…</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Airport Information -->
+      <section class="panel info-panel" aria-labelledby="info-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Facility Profile</p>
+            <h2 id="info-heading">Airport Information</h2>
+          </div>
+        </div>
+        <dl class="info-grid">
+          <div>
+            <dt>Airport Name</dt>
+            <dd id="info-name">{{ airport_name }}</dd>
+          </div>
+          <div>
+            <dt>ICAO Code</dt>
+            <dd id="info-icao">{{ airport_icao }}</dd>
+          </div>
+          <div>
+            <dt>Location</dt>
+            <dd id="info-location">{{ airport_location }}</dd>
+          </div>
+          <div>
+            <dt>Weather Source</dt>
+            <dd><span class="badge" id="info-source">—</span></dd>
+          </div>
+          <div class="info-span">
+            <dt>Last Updated</dt>
+            <dd class="mono" id="info-last-updated">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- AOCC AI Assistant -->
+      <section class="panel chatbot-panel" aria-labelledby="chat-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Operator Assist</p>
+            <h2 id="chat-heading">AOCC AI Assistant</h2>
+          </div>
+          <span class="badge badge-muted" id="chat-provider">MOCK</span>
+        </div>
+
+        <div class="chat-window" id="chat-window" role="log" aria-live="polite">
+          <div class="chat-bubble assistant">
+            <p class="chat-role">AOCC AI</p>
+            <p class="chat-text">
+              Assistant online. Ask about current weather, alert level, visibility,
+              wind, or recommended operational actions for VIDP.
+            </p>
+          </div>
+        </div>
+
+        <form class="chat-form" id="chat-form" autocomplete="off">
+          <label class="sr-only" for="chat-input">Message</label>
+          <input
+            type="text"
+            id="chat-input"
+            name="message"
+            placeholder="Ask the AOCC assistant…"
+            maxlength="4000"
+            required
+          />
+          <button type="submit" class="btn btn-primary" id="chat-submit">Send</button>
+        </form>
+      </section>
+    </main>
+
+    <footer class="aocc-footer">
+      <div class="footer-left">
+        <span>AOCC Weather Crisis Management</span>
+        <span class="footer-sep">|</span>
+        <span id="footer-health">Health: checking…</span>
+      </div>
+      <div class="footer-right">
+        <span>Swagger <a href="/docs" target="_blank" rel="noopener">/docs</a></span>
+        <span class="footer-sep">|</span>
+        <span>ReDoc <a href="/redoc" target="_blank" rel="noopener">/redoc</a></span>
+        <span class="footer-sep">|</span>
+        <span>Auto-refresh every 30 minutes.</span>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

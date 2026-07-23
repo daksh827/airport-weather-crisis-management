@@ -1,0 +1,95 @@
+/**
+ * Shared Fetch API client for AOCC endpoints.
+ * All responses are expected in the envelope:
+ * { success: boolean, message: string, data: object }
+ */
+
+const DEFAULT_HEADERS = {
+  Accept: "application/json",
+};
+
+/**
+ * @param {string} path
+ * @param {RequestInit} [options]
+ * @returns {Promise<{success: boolean, message: string, data: any}>}
+ */
+export async function apiRequest(path, options = {}) {
+  const config = {
+    ...options,
+    headers: {
+      ...DEFAULT_HEADERS,
+      ...(options.headers || {}),
+    },
+  };
+
+  let response;
+  try {
+    response = await fetch(path, config);
+  } catch (networkError) {
+    const error = new Error("Network error — unable to reach AOCC API");
+    error.cause = networkError;
+    error.success = false;
+    throw error;
+  }
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    const error = new Error(`Invalid JSON response from ${path}`);
+    error.status = response.status;
+    throw error;
+  }
+
+  if (!response.ok || payload.success === false) {
+    const error = new Error(payload.message || `Request failed (${response.status})`);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  return payload;
+}
+
+export async function getHealth() {
+  return apiRequest("/health");
+}
+
+export async function getWeather(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/weather${query}`);
+}
+
+export async function getSeverity(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/severity${query}`);
+}
+
+/**
+ * @param {string} message
+ * @param {string|null} [sessionId]
+ */
+export async function postChat(message, sessionId = null) {
+  return apiRequest("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message,
+      session_id: sessionId,
+    }),
+  });
+}
+
+/**
+ * @param {File} file
+ */
+export async function uploadDocument(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiRequest("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+}
