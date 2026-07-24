@@ -12,6 +12,7 @@ import {
   loadGroundOperations,
   loadTerminalOperations,
 } from "./phase5b.js";
+import { loadRecommendations } from "./recommendations.js";
 import { initSeverityControls, loadSeverity } from "./severity.js";
 import { initWeatherControls, loadWeather } from "./weather.js";
 
@@ -109,6 +110,7 @@ async function refreshOperationalPanels() {
   await loadFlightOperations();
   await loadRunwayOperations();
   await loadPhase5bPanels();
+  await loadRecommendations();
   await loadNotifications();
 
   if (!weather && !severity) {
@@ -140,6 +142,7 @@ async function bootstrap() {
     await loadFlightOperations();
     await loadRunwayOperations();
     await loadPhase5bPanels();
+    await loadRecommendations();
     await loadNotifications();
     refreshDeadline = Date.now() + WEATHER_REFRESH_INTERVAL;
   });
@@ -149,6 +152,7 @@ async function bootstrap() {
     await loadFlightOperations();
     await loadRunwayOperations();
     await loadPhase5bPanels();
+    await loadRecommendations();
     await loadNotifications();
     refreshDeadline = Date.now() + WEATHER_REFRESH_INTERVAL;
   });

@@ -7,6 +7,10 @@ from backend.services.impact_service import ImpactService, get_impact_service
 from backend.services.kpi_service import AirportKPIService, get_airport_kpi_service
 from backend.services.notification_service import NotificationService, get_notification_service
 from backend.services.rag_service import RAGService, get_rag_service
+from backend.services.recommendation_service import (
+    RecommendationService,
+    get_recommendation_service,
+)
 from backend.services.runway_service import RunwayOperationsService, get_runway_operations_service
 from backend.services.severity_service import SeverityService, get_severity_service
 from backend.services.terminal_service import TerminalOperationsService, get_terminal_operations_service
@@ -24,6 +28,7 @@ __all__ = [
     "TerminalOperationsService",
     "GroundOperationsService",
     "AirportKPIService",
+    "RecommendationService",
     "get_weather_service",
     "get_severity_service",
     "get_rag_service",
@@ -35,4 +40,5 @@ __all__ = [
     "get_terminal_operations_service",
     "get_ground_operations_service",
     "get_airport_kpi_service",
+    "get_recommendation_service",
 ]

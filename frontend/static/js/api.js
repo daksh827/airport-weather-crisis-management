@@ -108,6 +108,11 @@ export async function getAirportKpis(icao) {
   return apiRequest(`/api/operations/kpi${query}`);
 }
 
+export async function getRecommendations(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/recommendations${query}`);
+}
+
 /**
  * @param {string} message
  * @param {string|null} [sessionId]
