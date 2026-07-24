@@ -83,6 +83,16 @@ export async function getNotifications(limit = 30) {
   return apiRequest(`/api/notifications?limit=${encodeURIComponent(limit)}`);
 }
 
+export async function getFlightOperations(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/operations/flights${query}`);
+}
+
+export async function getRunwayOperations(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/operations/runway${query}`);
+}
+
 /**
  * @param {string} message
  * @param {string|null} [sessionId]

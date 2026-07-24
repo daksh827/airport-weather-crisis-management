@@ -5,6 +5,7 @@
 import { getHealth } from "./api.js";
 import { loadAlerts } from "./alerts.js";
 import { initChatbot } from "./chatbot.js";
+import { loadFlightOperations, loadRunwayOperations } from "./flights.js";
 import { loadNotifications, loadOperationsImpact } from "./operations.js";
 import { initSeverityControls, loadSeverity } from "./severity.js";
 import { initWeatherControls, loadWeather } from "./weather.js";
@@ -94,6 +95,8 @@ async function refreshOperationalPanels() {
   const severity = await loadSeverity();
   await loadAlerts();
   await loadOperationsImpact();
+  await loadFlightOperations();
+  await loadRunwayOperations();
   await loadNotifications();
 
   if (!weather && !severity) {
@@ -122,12 +125,16 @@ async function bootstrap() {
     await loadSeverity();
     await loadAlerts();
     await loadOperationsImpact();
+    await loadFlightOperations();
+    await loadRunwayOperations();
     await loadNotifications();
     refreshDeadline = Date.now() + WEATHER_REFRESH_INTERVAL;
   });
   initSeverityControls(async () => {
     await loadAlerts();
     await loadOperationsImpact();
+    await loadFlightOperations();
+    await loadRunwayOperations();
     await loadNotifications();
     refreshDeadline = Date.now() + WEATHER_REFRESH_INTERVAL;
   });

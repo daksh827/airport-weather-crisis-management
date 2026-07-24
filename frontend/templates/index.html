@@ -286,6 +286,79 @@
         </div>
       </section>
 
+      <!-- Flight Operations -->
+      <section class="panel flights-panel" id="flights-panel" aria-labelledby="flights-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Traffic Summary</p>
+            <h2 id="flights-heading">Flight Operations</h2>
+          </div>
+          <span class="status-chip" id="flights-chip">TODAY</span>
+        </div>
+        <div class="flight-grid">
+          <article class="flight-card">
+            <span class="flight-label">Today's Arrivals</span>
+            <span class="flight-value" id="flights-arrivals">--</span>
+          </article>
+          <article class="flight-card">
+            <span class="flight-label">Today's Departures</span>
+            <span class="flight-value" id="flights-departures">--</span>
+          </article>
+          <article class="flight-card flight-card-warn">
+            <span class="flight-label">Delayed Flights</span>
+            <span class="flight-value" id="flights-delayed">--</span>
+          </article>
+          <article class="flight-card flight-card-bad">
+            <span class="flight-label">Cancelled Flights</span>
+            <span class="flight-value" id="flights-cancelled">--</span>
+          </article>
+          <article class="flight-card flight-card-bad">
+            <span class="flight-label">Diverted Flights</span>
+            <span class="flight-value" id="flights-diverted">--</span>
+          </article>
+          <article class="flight-card flight-card-meta">
+            <span class="flight-label">Last Updated</span>
+            <span class="flight-value mono flight-value-sm" id="flights-last-updated">—</span>
+          </article>
+        </div>
+      </section>
+
+      <!-- Runway Operations -->
+      <section class="panel runway-panel" id="runway-panel" aria-labelledby="runway-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Airfield Status</p>
+            <h2 id="runway-heading">Runway Operations</h2>
+          </div>
+        </div>
+        <div class="runway-ops-card" id="runway-ops-card">
+          <div class="runway-hero">
+            <span class="field-label">Runway Number</span>
+            <span class="runway-number mono" id="runway-number">—</span>
+            <span class="field-label">Status</span>
+            <span class="runway-status-value" id="runway-status">—</span>
+          </div>
+          <div class="runway-details">
+            <div>
+              <span class="field-label">Surface</span>
+              <span id="runway-surface">—</span>
+            </div>
+            <div>
+              <span class="field-label">Inspection</span>
+              <span id="runway-inspection">—</span>
+            </div>
+            <div>
+              <span class="field-label">Lighting</span>
+              <span id="runway-lighting">—</span>
+            </div>
+            <div>
+              <span class="field-label">Last Updated</span>
+              <span class="mono" id="runway-last-updated">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Notification Feed -->
       <section class="panel notifications-panel" aria-labelledby="notif-heading">
         <div class="panel-header">

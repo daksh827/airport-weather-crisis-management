@@ -1,4 +1,4 @@
-"""Operations impact and notification API routes."""
+"""Operations impact, flights, runway, and notification API routes."""
 
 from __future__ import annotations
 
@@ -8,8 +8,10 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 
 from backend.schemas import success_response
+from backend.services.flight_service import FlightOperationsService, get_flight_operations_service
 from backend.services.impact_service import ImpactService, get_impact_service
 from backend.services.notification_service import NotificationService, get_notification_service
+from backend.services.runway_service import RunwayOperationsService, get_runway_operations_service
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,26 @@ def get_operations_impact(
     """Return AOCC operational impact assessment from live weather."""
     data = impact_service.get_impact(icao)
     return success_response(data, message="Operational impact assessed successfully")
+
+
+@operations_router.get("/flights")
+def get_flight_operations(
+    icao: Optional[str] = Query(default=None, description="Optional ICAO code"),
+    flight_service: FlightOperationsService = Depends(get_flight_operations_service),
+):
+    """Return simulated daily flight operations summary for AOCC."""
+    data = flight_service.get_flight_operations(icao)
+    return success_response(data, message="Flight operations retrieved successfully")
+
+
+@operations_router.get("/runway")
+def get_runway_operations(
+    icao: Optional[str] = Query(default=None, description="Optional ICAO code"),
+    runway_service: RunwayOperationsService = Depends(get_runway_operations_service),
+):
+    """Return runway status influenced by current weather severity."""
+    data = runway_service.get_runway_operations(icao)
+    return success_response(data, message="Runway operations retrieved successfully")
 
 
 @notifications_router.get("/notifications")
