@@ -243,6 +243,9 @@ body::before {
     "reco reco"
     "ops ops"
     "flights runway"
+    "terminal terminal"
+    "ground ground"
+    "kpi kpi"
     "notif history"
     "info chat";
   gap: 1.25rem;
@@ -258,6 +261,9 @@ body::before {
 .operations-panel { grid-area: ops; }
 .flights-panel { grid-area: flights; }
 .runway-panel { grid-area: runway; }
+.terminal-panel { grid-area: terminal; }
+.ground-panel { grid-area: ground; }
+.kpi-panel { grid-area: kpi; }
 .notifications-panel { grid-area: notif; }
 .history-panel { grid-area: history; }
 .info-panel { grid-area: info; }
@@ -992,6 +998,9 @@ body::before {
       "ops"
       "flights"
       "runway"
+      "terminal"
+      "ground"
+      "kpi"
       "notif"
       "history"
       "info"
@@ -1446,5 +1455,191 @@ body::before {
 @media (max-width: 1200px) {
   .flight-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Phase 5B — Terminal, Ground, KPI */
+
+.terminal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.terminal-card {
+  padding: 1rem 1.05rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-metric);
+}
+
+.terminal-card h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.98rem;
+  color: var(--radar);
+}
+
+.terminal-stats {
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.terminal-stats > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.86rem;
+}
+
+.terminal-stats dt {
+  color: var(--text-dim);
+}
+
+.terminal-stats dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.terminal-stats dd.ok { color: #86efac; }
+.terminal-stats dd.warn { color: #fcd34d; }
+.terminal-stats dd.bad { color: #fca5a5; }
+
+.ground-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.ground-card {
+  padding: 0.95rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-metric);
+}
+
+.ground-card h3 {
+  margin: 0 0 0.7rem;
+  font-size: 0.92rem;
+}
+
+.ground-card p {
+  margin: 0.35rem 0 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.ground-card strong {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.kpi-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.kpi-stat {
+  padding: 0.9rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-metric);
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.kpi-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.kpi-value {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: auto;
+}
+
+.kpi-bars {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.kpi-bar-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.kpi-bar-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.kpi-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(8, 14, 24, 0.75);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.kpi-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #29d3c3, #3aa0ff);
+  transition: width 0.45s ease;
+}
+
+.kpi-bar-efficiency {
+  background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+  background-size: 100% 100%;
+}
+
+.kpi-airport-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(8, 14, 24, 0.55);
+}
+
+.kpi-airport-status.status-operational { color: #86efac; border-color: rgba(34, 197, 94, 0.45); }
+.kpi-airport-status.status-heightened-watch { color: #fde047; border-color: rgba(234, 179, 8, 0.45); }
+.kpi-airport-status.status-limited-operations { color: #fdba74; border-color: rgba(249, 115, 22, 0.45); }
+.kpi-airport-status.status-disrupted,
+.kpi-airport-status.status-closed { color: #fca5a5; border-color: rgba(239, 68, 68, 0.5); }
+
+@media (max-width: 1200px) {
+  .terminal-grid,
+  .ground-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .kpi-stat-grid {
+    grid-template-columns: 1fr;
   }
 }

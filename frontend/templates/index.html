@@ -359,6 +359,133 @@
         </div>
       </section>
 
+      <!-- Terminal Operations -->
+      <section class="panel terminal-panel" id="terminal-panel" aria-labelledby="terminal-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Passenger Facilities</p>
+            <h2 id="terminal-heading">Terminal Operations</h2>
+          </div>
+        </div>
+        <div class="terminal-grid">
+          <article class="terminal-card">
+            <h3>Terminal 1</h3>
+            <dl class="terminal-stats">
+              <div><dt>Occupied Gates</dt><dd id="t1-occupied">--</dd></div>
+              <div><dt>Available Gates</dt><dd id="t1-available">--</dd></div>
+              <div><dt>Passenger Load</dt><dd id="t1-load">—</dd></div>
+              <div><dt>Security Queue</dt><dd id="t1-queue">—</dd></div>
+              <div><dt>Boarding Gates Active</dt><dd id="t1-boarding">--</dd></div>
+            </dl>
+          </article>
+          <article class="terminal-card">
+            <h3>Terminal 2</h3>
+            <dl class="terminal-stats">
+              <div><dt>Occupied Gates</dt><dd id="t2-occupied">--</dd></div>
+              <div><dt>Available Gates</dt><dd id="t2-available">--</dd></div>
+              <div><dt>Passenger Load</dt><dd id="t2-load">—</dd></div>
+              <div><dt>Security Queue</dt><dd id="t2-queue">—</dd></div>
+              <div><dt>Boarding Gates Active</dt><dd id="t2-boarding">--</dd></div>
+            </dl>
+          </article>
+          <article class="terminal-card">
+            <h3>Terminal 3</h3>
+            <dl class="terminal-stats">
+              <div><dt>Occupied Gates</dt><dd id="t3-occupied">--</dd></div>
+              <div><dt>Available Gates</dt><dd id="t3-available">--</dd></div>
+              <div><dt>Passenger Load</dt><dd id="t3-load">—</dd></div>
+              <div><dt>Security Queue</dt><dd id="t3-queue">—</dd></div>
+              <div><dt>Boarding Gates Active</dt><dd id="t3-boarding">--</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <!-- Ground Operations -->
+      <section class="panel ground-panel" id="ground-panel" aria-labelledby="ground-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Airside Resources</p>
+            <h2 id="ground-heading">Ground Operations</h2>
+          </div>
+          <span class="impact-overall ok" id="ground-status">—</span>
+        </div>
+        <div class="ground-grid">
+          <article class="ground-card">
+            <h3>Fuel Trucks</h3>
+            <p><span>Available</span><strong id="ground-fuel-available">--</strong></p>
+            <p><span>In Use</span><strong id="ground-fuel-inuse">--</strong></p>
+            <p><span>Maintenance</span><strong id="ground-fuel-maint">--</strong></p>
+          </article>
+          <article class="ground-card">
+            <h3>Baggage Vehicles</h3>
+            <p><span>Available</span><strong id="ground-baggage-available">--</strong></p>
+            <p><span>In Use</span><strong id="ground-baggage-inuse">--</strong></p>
+            <p><span>Maintenance</span><strong id="ground-baggage-maint">--</strong></p>
+          </article>
+          <article class="ground-card">
+            <h3>Pushback Vehicles</h3>
+            <p><span>Available</span><strong id="ground-pushback-available">--</strong></p>
+            <p><span>In Use</span><strong id="ground-pushback-inuse">--</strong></p>
+            <p><span>Maintenance</span><strong id="ground-pushback-maint">--</strong></p>
+          </article>
+          <article class="ground-card">
+            <h3>Catering Vehicles</h3>
+            <p><span>Available</span><strong id="ground-catering-available">--</strong></p>
+            <p><span>In Use</span><strong id="ground-catering-inuse">--</strong></p>
+            <p><span>Maintenance</span><strong id="ground-catering-maint">--</strong></p>
+          </article>
+          <article class="ground-card">
+            <h3>Maintenance Vehicles</h3>
+            <p><span>Available</span><strong id="ground-maintenance-available">--</strong></p>
+            <p><span>In Use</span><strong id="ground-maintenance-inuse">--</strong></p>
+            <p><span>Maintenance</span><strong id="ground-maintenance-maint">--</strong></p>
+          </article>
+          <article class="ground-card">
+            <h3>Follow Me Vehicles</h3>
+            <p><span>Available</span><strong id="ground-followme-available">--</strong></p>
+            <p><span>In Use</span><strong id="ground-followme-inuse">--</strong></p>
+            <p><span>Maintenance</span><strong id="ground-followme-maint">--</strong></p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Airport KPI Dashboard -->
+      <section class="panel kpi-panel" id="kpi-panel" aria-labelledby="kpi-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Performance Overview</p>
+            <h2 id="kpi-heading">Airport KPI Dashboard</h2>
+          </div>
+          <span class="kpi-airport-status" id="kpi-airport-status">—</span>
+        </div>
+        <div class="kpi-stat-grid">
+          <article class="kpi-stat"><span class="kpi-label">Flights Today</span><span class="kpi-value" id="kpi-flights-today">--</span></article>
+          <article class="kpi-stat"><span class="kpi-label">Passengers Today</span><span class="kpi-value" id="kpi-passengers-today">--</span></article>
+          <article class="kpi-stat"><span class="kpi-label">Delayed Flights</span><span class="kpi-value" id="kpi-delayed">--</span></article>
+          <article class="kpi-stat"><span class="kpi-label">Cancelled Flights</span><span class="kpi-value" id="kpi-cancelled">--</span></article>
+          <article class="kpi-stat"><span class="kpi-label">Average Delay</span><span class="kpi-value" id="kpi-avg-delay">—</span></article>
+        </div>
+        <div class="kpi-bars">
+          <div class="kpi-bar-row">
+            <div class="kpi-bar-head"><span>Runway Availability</span><span id="kpi-runway-bar-label">--%</span></div>
+            <div class="kpi-bar-track"><div class="kpi-bar-fill" id="kpi-runway-bar"></div></div>
+          </div>
+          <div class="kpi-bar-row">
+            <div class="kpi-bar-head"><span>Terminal Utilization</span><span id="kpi-terminal-bar-label">--%</span></div>
+            <div class="kpi-bar-track"><div class="kpi-bar-fill" id="kpi-terminal-bar"></div></div>
+          </div>
+          <div class="kpi-bar-row">
+            <div class="kpi-bar-head"><span>Ground Vehicle Availability</span><span id="kpi-ground-bar-label">--%</span></div>
+            <div class="kpi-bar-track"><div class="kpi-bar-fill" id="kpi-ground-bar"></div></div>
+          </div>
+          <div class="kpi-bar-row">
+            <div class="kpi-bar-head"><span>Operational Efficiency</span><span id="kpi-efficiency-bar-label">--%</span></div>
+            <div class="kpi-bar-track"><div class="kpi-bar-fill kpi-bar-efficiency" id="kpi-efficiency-bar"></div></div>
+          </div>
+        </div>
+      </section>
+
       <!-- Notification Feed -->
       <section class="panel notifications-panel" aria-labelledby="notif-heading">
         <div class="panel-header">

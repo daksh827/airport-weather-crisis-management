@@ -7,8 +7,19 @@ import { loadAlerts } from "./alerts.js";
 import { initChatbot } from "./chatbot.js";
 import { loadFlightOperations, loadRunwayOperations } from "./flights.js";
 import { loadNotifications, loadOperationsImpact } from "./operations.js";
+import {
+  loadAirportKpis,
+  loadGroundOperations,
+  loadTerminalOperations,
+} from "./phase5b.js";
 import { initSeverityControls, loadSeverity } from "./severity.js";
 import { initWeatherControls, loadWeather } from "./weather.js";
+
+async function loadPhase5bPanels() {
+  await loadTerminalOperations();
+  await loadGroundOperations();
+  await loadAirportKpis();
+}
 
 const WEATHER_REFRESH_INTERVAL = 30 * 60 * 1000;
 
@@ -97,6 +108,7 @@ async function refreshOperationalPanels() {
   await loadOperationsImpact();
   await loadFlightOperations();
   await loadRunwayOperations();
+  await loadPhase5bPanels();
   await loadNotifications();
 
   if (!weather && !severity) {
@@ -127,6 +139,7 @@ async function bootstrap() {
     await loadOperationsImpact();
     await loadFlightOperations();
     await loadRunwayOperations();
+    await loadPhase5bPanels();
     await loadNotifications();
     refreshDeadline = Date.now() + WEATHER_REFRESH_INTERVAL;
   });
@@ -135,6 +148,7 @@ async function bootstrap() {
     await loadOperationsImpact();
     await loadFlightOperations();
     await loadRunwayOperations();
+    await loadPhase5bPanels();
     await loadNotifications();
     refreshDeadline = Date.now() + WEATHER_REFRESH_INTERVAL;
   });

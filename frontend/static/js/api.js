@@ -93,6 +93,21 @@ export async function getRunwayOperations(icao) {
   return apiRequest(`/api/operations/runway${query}`);
 }
 
+export async function getTerminalOperations(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/operations/terminal${query}`);
+}
+
+export async function getGroundOperations(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/operations/ground${query}`);
+}
+
+export async function getAirportKpis(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/operations/kpi${query}`);
+}
+
 /**
  * @param {string} message
  * @param {string|null} [sessionId]
