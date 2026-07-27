@@ -241,6 +241,7 @@ body::before {
     "weather severity"
     "alert trends"
     "decision chat"
+    "incident incident"
     "reco reco"
     "ops ops"
     "notif history"
@@ -266,6 +267,7 @@ body::before {
 .ground-panel { grid-area: ground; }
 .kpi-panel { grid-area: kpi; }
 .decision-support-panel { grid-area: decision; }
+.incident-panel { grid-area: incident; }
 .notifications-panel { grid-area: notif; }
 .history-panel { grid-area: history; }
 .info-panel { grid-area: info; }
@@ -998,6 +1000,7 @@ body::before {
       "trends"
       "decision"
       "chat"
+      "incident"
       "reco"
       "ops"
       "notif"
@@ -1783,6 +1786,118 @@ body::before {
 
 @media (max-width: 1200px) {
   .decision-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Phase 6A — Incident & Crisis Management */
+
+.incident-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.incident-stat-card {
+  padding: 0.9rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-metric);
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.incident-stat-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.incident-stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-top: auto;
+  color: var(--text);
+}
+
+.incident-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.incident-table th,
+.incident-table td {
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.incident-table th {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.incident-table tr:last-child td {
+  border-bottom: none;
+}
+
+.incident-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+}
+
+.incident-sev-high,
+.incident-status-progress {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.incident-sev-medium,
+.incident-status-assigned {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.incident-sev-low,
+.incident-status-resolved,
+.incident-status-closed {
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.incident-status-open {
+  color: #93c5fd;
+  background: rgba(58, 160, 255, 0.12);
+  border-color: rgba(58, 160, 255, 0.35);
+}
+
+@media (max-width: 1200px) {
+  .incident-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .incident-stat-grid {
     grid-template-columns: 1fr;
   }
 }

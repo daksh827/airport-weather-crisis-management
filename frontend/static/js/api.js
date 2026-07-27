@@ -113,6 +113,16 @@ export async function getRecommendations(icao) {
   return apiRequest(`/api/recommendations${query}`);
 }
 
+export async function getIncidents(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/incidents${query}`);
+}
+
+export async function getIncidentStats(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/incidents/stats${query}`);
+}
+
 /**
  * @param {string} message
  * @param {string|null} [sessionId]

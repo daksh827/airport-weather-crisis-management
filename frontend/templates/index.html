@@ -284,6 +284,63 @@
           <button type="submit" class="btn btn-primary" id="chat-submit">Send</button>
         </form>
       </section>
+
+      <!-- Incident & Crisis Management (Phase 6A) -->
+      <section class="panel incident-panel" id="incident-panel" aria-labelledby="incident-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">AOCC Crisis Desk</p>
+            <h2 id="incident-heading">Incident &amp; Crisis Management</h2>
+          </div>
+          <div class="panel-actions">
+            <button type="button" class="btn btn-primary" id="btn-create-incident">Create Incident</button>
+          </div>
+        </div>
+
+        <div class="incident-stat-grid">
+          <article class="incident-stat-card">
+            <span class="incident-stat-label">Open Incidents</span>
+            <span class="incident-stat-value" id="incident-stat-open">--</span>
+          </article>
+          <article class="incident-stat-card">
+            <span class="incident-stat-label">Assigned</span>
+            <span class="incident-stat-value" id="incident-stat-assigned">--</span>
+          </article>
+          <article class="incident-stat-card">
+            <span class="incident-stat-label">In Progress</span>
+            <span class="incident-stat-value" id="incident-stat-progress">--</span>
+          </article>
+          <article class="incident-stat-card">
+            <span class="incident-stat-label">Resolved Today</span>
+            <span class="incident-stat-value" id="incident-stat-resolved">--</span>
+          </article>
+          <article class="incident-stat-card">
+            <span class="incident-stat-label">Closed Today</span>
+            <span class="incident-stat-value" id="incident-stat-closed">--</span>
+          </article>
+        </div>
+
+        <div class="table-wrap">
+          <table class="incident-table" id="incident-table">
+            <thead>
+              <tr>
+                <th>Incident ID</th>
+                <th>Incident Type</th>
+                <th>Severity</th>
+                <th>Airport Area</th>
+                <th>Assigned Department</th>
+                <th>Status</th>
+                <th>Created Time</th>
+                <th>Last Updated</th>
+              </tr>
+            </thead>
+            <tbody id="incident-table-body">
+              <tr><td colspan="8" class="table-empty">Loading incidents…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- AOCC Recommendations -->
       <section class="panel recommendations-panel" aria-labelledby="reco-heading">
         <div class="panel-header">
