@@ -240,15 +240,15 @@ body::before {
   grid-template-areas:
     "weather severity"
     "alert trends"
+    "decision chat"
     "reco reco"
     "ops ops"
+    "notif history"
+    "info info"
     "flights runway"
     "terminal terminal"
     "ground ground"
-    "kpi kpi"
-    "decision decision"
-    "notif history"
-    "info chat";
+    "kpi kpi";
   gap: 1.25rem;
   padding: 1.25rem 1.85rem 1.6rem;
   align-content: start;
@@ -996,18 +996,18 @@ body::before {
       "severity"
       "alert"
       "trends"
+      "decision"
+      "chat"
       "reco"
       "ops"
+      "notif"
+      "history"
+      "info"
       "flights"
       "runway"
       "terminal"
       "ground"
-      "kpi"
-      "decision"
-      "notif"
-      "history"
-      "info"
-      "chat";
+      "kpi";
   }
 
   .reco-grid {

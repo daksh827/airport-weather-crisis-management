@@ -234,6 +234,56 @@
         <p class="trend-summary" id="trend-summary">Awaiting comparative observation.</p>
       </section>
 
+      <!-- AI Operations Decision Support (Phase 5C) -->
+      <section class="panel decision-support-panel" id="decision-support-panel" aria-labelledby="decision-support-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Rule-Based AOCC Guidance</p>
+            <h2 id="decision-support-heading">AI Operations Decision Support</h2>
+          </div>
+        </div>
+        <div class="overall-decision-block">
+          <p class="overall-decision-label">Overall Airport Decision</p>
+          <p class="overall-decision-value" id="overall-airport-decision">Assessing operational posture…</p>
+        </div>
+        <div class="decision-card-grid" id="recommendation-cards">
+          <p class="decision-empty">Loading operational recommendations…</p>
+        </div>
+      </section>
+
+      <!-- AOCC AI Assistant -->
+      <section class="panel chatbot-panel" aria-labelledby="chat-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Operator Assist</p>
+            <h2 id="chat-heading">AOCC AI Assistant</h2>
+          </div>
+          <span class="badge badge-muted" id="chat-provider">MOCK</span>
+        </div>
+
+        <div class="chat-window" id="chat-window" role="log" aria-live="polite">
+          <div class="chat-bubble assistant">
+            <p class="chat-role">AOCC AI</p>
+            <p class="chat-text">
+              Assistant online. Ask about current weather, alert level, visibility,
+              wind, or recommended operational actions for VIDP.
+            </p>
+          </div>
+        </div>
+
+        <form class="chat-form" id="chat-form" autocomplete="off">
+          <label class="sr-only" for="chat-input">Message</label>
+          <input
+            type="text"
+            id="chat-input"
+            name="message"
+            placeholder="Ask the AOCC assistant…"
+            maxlength="4000"
+            required
+          />
+          <button type="submit" class="btn btn-primary" id="chat-submit">Send</button>
+        </form>
+      </section>
       <!-- AOCC Recommendations -->
       <section class="panel recommendations-panel" aria-labelledby="reco-heading">
         <div class="panel-header">
@@ -284,6 +334,78 @@
           <article class="impact-card"><span class="impact-label">Arrival Rate</span><span class="impact-value" id="impact-arrival-rate">—</span></article>
           <article class="impact-card"><span class="impact-label">Runway Status</span><span class="impact-value" id="impact-runway-status">—</span></article>
         </div>
+      </section>
+
+      <!-- Notification Feed -->
+      <section class="panel notifications-panel" aria-labelledby="notif-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Event Timeline</p>
+            <h2 id="notif-heading">Weather Notification Feed</h2>
+          </div>
+        </div>
+        <ul class="notification-feed" id="notification-feed">
+          <li class="feed-empty">Loading notifications…</li>
+        </ul>
+      </section>
+
+      <!-- Alert History -->
+      <section class="panel history-panel" aria-labelledby="history-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Incident Log</p>
+            <h2 id="history-heading">Alert History</h2>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="alert-history-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Alert</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Weather Condition</th>
+                <th>AOCC Action</th>
+              </tr>
+            </thead>
+            <tbody id="alert-history-body">
+              <tr><td colspan="6" class="table-empty">Loading history…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Airport Information -->
+      <section class="panel info-panel" aria-labelledby="info-heading">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Facility Profile</p>
+            <h2 id="info-heading">Airport Information</h2>
+          </div>
+        </div>
+        <dl class="info-grid">
+          <div>
+            <dt>Airport Name</dt>
+            <dd id="info-name">{{ airport_name }}</dd>
+          </div>
+          <div>
+            <dt>ICAO Code</dt>
+            <dd id="info-icao">{{ airport_icao }}</dd>
+          </div>
+          <div>
+            <dt>Location</dt>
+            <dd id="info-location">{{ airport_location }}</dd>
+          </div>
+          <div>
+            <dt>Weather Source</dt>
+            <dd><span class="badge" id="info-source">—</span></dd>
+          </div>
+          <div class="info-span">
+            <dt>Last Updated</dt>
+            <dd class="mono" id="info-last-updated">—</dd>
+          </div>
+        </dl>
       </section>
 
       <!-- Flight Operations -->
@@ -486,128 +608,6 @@
         </div>
       </section>
 
-      <!-- AI Operations Decision Support (Phase 5C) -->
-      <section class="panel decision-support-panel" id="decision-support-panel" aria-labelledby="decision-support-heading">
-        <div class="panel-header">
-          <div>
-            <p class="panel-kicker">Rule-Based AOCC Guidance</p>
-            <h2 id="decision-support-heading">AI Operations Decision Support</h2>
-          </div>
-        </div>
-        <div class="overall-decision-block">
-          <p class="overall-decision-label">Overall Airport Decision</p>
-          <p class="overall-decision-value" id="overall-airport-decision">Assessing operational posture…</p>
-        </div>
-        <div class="decision-card-grid" id="recommendation-cards">
-          <p class="decision-empty">Loading operational recommendations…</p>
-        </div>
-      </section>
-
-      <!-- Notification Feed -->
-      <section class="panel notifications-panel" aria-labelledby="notif-heading">
-        <div class="panel-header">
-          <div>
-            <p class="panel-kicker">Event Timeline</p>
-            <h2 id="notif-heading">Weather Notification Feed</h2>
-          </div>
-        </div>
-        <ul class="notification-feed" id="notification-feed">
-          <li class="feed-empty">Loading notifications…</li>
-        </ul>
-      </section>
-
-      <!-- Alert History -->
-      <section class="panel history-panel" aria-labelledby="history-heading">
-        <div class="panel-header">
-          <div>
-            <p class="panel-kicker">Incident Log</p>
-            <h2 id="history-heading">Alert History</h2>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="alert-history-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Alert</th>
-                <th>Severity</th>
-                <th>Status</th>
-                <th>Weather Condition</th>
-                <th>AOCC Action</th>
-              </tr>
-            </thead>
-            <tbody id="alert-history-body">
-              <tr><td colspan="6" class="table-empty">Loading history…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Airport Information -->
-      <section class="panel info-panel" aria-labelledby="info-heading">
-        <div class="panel-header">
-          <div>
-            <p class="panel-kicker">Facility Profile</p>
-            <h2 id="info-heading">Airport Information</h2>
-          </div>
-        </div>
-        <dl class="info-grid">
-          <div>
-            <dt>Airport Name</dt>
-            <dd id="info-name">{{ airport_name }}</dd>
-          </div>
-          <div>
-            <dt>ICAO Code</dt>
-            <dd id="info-icao">{{ airport_icao }}</dd>
-          </div>
-          <div>
-            <dt>Location</dt>
-            <dd id="info-location">{{ airport_location }}</dd>
-          </div>
-          <div>
-            <dt>Weather Source</dt>
-            <dd><span class="badge" id="info-source">—</span></dd>
-          </div>
-          <div class="info-span">
-            <dt>Last Updated</dt>
-            <dd class="mono" id="info-last-updated">—</dd>
-          </div>
-        </dl>
-      </section>
-
-      <!-- AOCC AI Assistant -->
-      <section class="panel chatbot-panel" aria-labelledby="chat-heading">
-        <div class="panel-header">
-          <div>
-            <p class="panel-kicker">Operator Assist</p>
-            <h2 id="chat-heading">AOCC AI Assistant</h2>
-          </div>
-          <span class="badge badge-muted" id="chat-provider">MOCK</span>
-        </div>
-
-        <div class="chat-window" id="chat-window" role="log" aria-live="polite">
-          <div class="chat-bubble assistant">
-            <p class="chat-role">AOCC AI</p>
-            <p class="chat-text">
-              Assistant online. Ask about current weather, alert level, visibility,
-              wind, or recommended operational actions for VIDP.
-            </p>
-          </div>
-        </div>
-
-        <form class="chat-form" id="chat-form" autocomplete="off">
-          <label class="sr-only" for="chat-input">Message</label>
-          <input
-            type="text"
-            id="chat-input"
-            name="message"
-            placeholder="Ask the AOCC assistant…"
-            maxlength="4000"
-            required
-          />
-          <button type="submit" class="btn btn-primary" id="chat-submit">Send</button>
-        </form>
-      </section>
     </main>
 
     <footer class="aocc-footer">
