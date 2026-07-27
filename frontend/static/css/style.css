@@ -1890,6 +1890,166 @@ body::before {
   border-color: rgba(58, 160, 255, 0.35);
 }
 
+.incident-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  min-width: 11rem;
+}
+
+.incident-status-select {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text);
+  background: var(--bg-metric);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.28rem 0.4rem;
+  max-width: 8.5rem;
+}
+
+.incident-action-btn {
+  font-size: 0.72rem;
+  padding: 0.28rem 0.5rem;
+  line-height: 1.2;
+}
+
+.incident-action-btn.is-danger {
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.incident-action-btn.is-danger:hover {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.65);
+}
+
+/* Phase 6B — Incident modal */
+
+.incident-modal[hidden] {
+  display: none !important;
+}
+
+.incident-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.incident-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 8, 14, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.incident-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 100%);
+  max-height: min(90vh, 760px);
+  overflow: auto;
+  background: var(--bg-panel-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.15rem 1.2rem 1.2rem;
+}
+
+.incident-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.incident-modal-header h3 {
+  margin: 0.15rem 0 0;
+  font-size: 1.15rem;
+}
+
+.incident-modal-close {
+  padding: 0.35rem 0.55rem;
+  min-width: auto;
+}
+
+.incident-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem 0.75rem;
+}
+
+.incident-field-span {
+  grid-column: 1 / -1;
+}
+
+.incident-field .req {
+  color: #f87171;
+}
+
+.incident-input {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: var(--text);
+  background: var(--bg-metric);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.incident-input:focus {
+  border-color: var(--accent);
+}
+
+.incident-input[readonly] {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.incident-textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.45;
+}
+
+.incident-field-error {
+  margin: 0.3rem 0 0;
+  font-size: 0.74rem;
+  color: #fca5a5;
+}
+
+.incident-field.is-invalid .incident-input {
+  border-color: rgba(239, 68, 68, 0.65);
+}
+
+.incident-form-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.incident-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 1.15rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+body.incident-modal-open {
+  overflow: hidden;
+}
+
 @media (max-width: 1200px) {
   .incident-stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1900,4 +2060,9 @@ body::before {
   .incident-stat-grid {
     grid-template-columns: 1fr;
   }
+
+  .incident-form-grid {
+    grid-template-columns: 1fr;
+  }
 }
+

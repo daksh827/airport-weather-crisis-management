@@ -332,14 +332,149 @@
                 <th>Status</th>
                 <th>Created Time</th>
                 <th>Last Updated</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="incident-table-body">
-              <tr><td colspan="8" class="table-empty">Loading incidents…</td></tr>
+              <tr><td colspan="9" class="table-empty">Loading incidents…</td></tr>
             </tbody>
           </table>
         </div>
       </section>
+
+      <!-- Phase 6B — Create / Edit Incident Modal -->
+      <div
+        class="incident-modal"
+        id="incident-modal"
+        hidden
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="incident-modal-title"
+      >
+        <div class="incident-modal-backdrop" data-incident-modal-close></div>
+        <div class="incident-modal-dialog">
+          <div class="incident-modal-header">
+            <div>
+              <p class="panel-kicker" id="incident-modal-kicker">AOCC Crisis Desk</p>
+              <h3 id="incident-modal-title">Create Incident</h3>
+            </div>
+            <button
+              type="button"
+              class="btn btn-ghost incident-modal-close"
+              data-incident-modal-close
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form id="incident-form" class="incident-form" novalidate>
+            <input type="hidden" id="incident-form-mode" value="create" />
+            <input type="hidden" id="incident-edit-id" value="" />
+
+            <div class="incident-form-grid">
+              <div class="incident-field" id="field-incident-id">
+                <label class="field-label" for="incident-id-display">Incident ID</label>
+                <input
+                  type="text"
+                  id="incident-id-display"
+                  class="incident-input mono"
+                  readonly
+                  value="Auto-generated"
+                />
+              </div>
+
+              <div class="incident-field" id="field-created-time">
+                <label class="field-label" for="incident-created-display">Created Time</label>
+                <input
+                  type="text"
+                  id="incident-created-display"
+                  class="incident-input mono"
+                  readonly
+                  value="Auto-filled on create"
+                />
+              </div>
+
+              <div class="incident-field incident-field-span">
+                <label class="field-label" for="incident-type">Incident Type <span class="req">*</span></label>
+                <select id="incident-type" class="incident-input" required>
+                  <option value="">Select incident type…</option>
+                  <option>Thunderstorm</option>
+                  <option>Heavy Rain</option>
+                  <option>Dense Fog</option>
+                  <option>Strong Wind</option>
+                  <option>Runway Closure</option>
+                  <option>Flight Delay</option>
+                  <option>Medical Emergency</option>
+                  <option>Security Incident</option>
+                  <option>Equipment Failure</option>
+                  <option>Passenger Congestion</option>
+                </select>
+                <p class="incident-field-error" id="error-incident-type" hidden></p>
+              </div>
+
+              <div class="incident-field">
+                <label class="field-label" for="incident-severity">Severity <span class="req">*</span></label>
+                <select id="incident-severity" class="incident-input" required>
+                  <option value="">Select severity…</option>
+                  <option value="Level 1">Level 1</option>
+                  <option value="Level 2">Level 2</option>
+                  <option value="Level 3">Level 3</option>
+                </select>
+                <p class="incident-field-error" id="error-incident-severity" hidden></p>
+              </div>
+
+              <div class="incident-field">
+                <label class="field-label" for="incident-area">Airport Area <span class="req">*</span></label>
+                <select id="incident-area" class="incident-input" required>
+                  <option value="">Select airport area…</option>
+                  <option>Runway</option>
+                  <option>Taxiway</option>
+                  <option>Terminal 1</option>
+                  <option>Terminal 2</option>
+                  <option>Terminal 3</option>
+                  <option>Apron</option>
+                  <option>Cargo</option>
+                </select>
+                <p class="incident-field-error" id="error-incident-area" hidden></p>
+              </div>
+
+              <div class="incident-field incident-field-span" id="field-incident-status" hidden>
+                <label class="field-label" for="incident-status">Status</label>
+                <select id="incident-status" class="incident-input">
+                  <option value="Open">Open</option>
+                  <option value="Assigned">Assigned</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
+                </select>
+              </div>
+
+              <div class="incident-field incident-field-span">
+                <label class="field-label" for="incident-description">Description <span class="req">*</span></label>
+                <textarea
+                  id="incident-description"
+                  class="incident-input incident-textarea"
+                  rows="4"
+                  maxlength="2000"
+                  placeholder="Describe the operational situation…"
+                  required
+                ></textarea>
+                <p class="incident-field-error" id="error-incident-description" hidden></p>
+              </div>
+
+              <p class="incident-form-hint incident-field-span" id="incident-dept-hint">
+                Department is assigned automatically from type and area.
+              </p>
+            </div>
+
+            <div class="incident-form-actions">
+              <button type="button" class="btn btn-ghost" data-incident-modal-close>Cancel</button>
+              <button type="submit" class="btn btn-primary" id="incident-form-submit">Create Incident</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
       <!-- AOCC Recommendations -->
       <section class="panel recommendations-panel" aria-labelledby="reco-heading">

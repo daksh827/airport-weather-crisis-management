@@ -1,4 +1,4 @@
-"""API schemas for AOCC Incident Management (Phase 6A)."""
+"""API schemas for AOCC Incident Management (Phase 6A/6B)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 
 class IncidentItem(BaseModel):
-    """Incident row returned by GET /api/incidents."""
+    """Incident row returned by incident APIs."""
 
     incident_id: str
     incident_type: str
@@ -38,3 +38,21 @@ class IncidentStatsData(BaseModel):
     in_progress: int = 0
     resolved_today: int = 0
     closed_today: int = 0
+
+
+class CreateIncidentRequest(BaseModel):
+    """Payload for POST /api/incidents."""
+
+    incident_type: str = Field(..., min_length=1, max_length=120)
+    description: str = Field(..., min_length=1, max_length=2000)
+    severity: str = Field(..., min_length=1, max_length=40)
+    airport_area: str = Field(..., min_length=1, max_length=120)
+    icao_code: Optional[str] = Field(default=None, max_length=8)
+
+
+class UpdateIncidentRequest(BaseModel):
+    """Payload for PUT /api/incidents/{id} — editable fields only."""
+
+    status: Optional[str] = Field(default=None, max_length=40)
+    description: Optional[str] = Field(default=None, min_length=1, max_length=2000)
+    airport_area: Optional[str] = Field(default=None, min_length=1, max_length=120)

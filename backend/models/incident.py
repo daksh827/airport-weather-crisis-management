@@ -1,4 +1,4 @@
-"""Domain models for AOCC Incident & Crisis Management (Phase 6A)."""
+"""Domain models for AOCC Incident & Crisis Management (Phase 6A/6B)."""
 
 from __future__ import annotations
 
@@ -12,6 +12,10 @@ from pydantic import BaseModel, Field
 class IncidentSeverity(str, Enum):
     """Operational severity for an airport incident."""
 
+    LEVEL_1 = "Level 1"
+    LEVEL_2 = "Level 2"
+    LEVEL_3 = "Level 3"
+    # Retained for Phase 6A mock compatibility
     LOW = "Low"
     MEDIUM = "Medium"
     HIGH = "High"

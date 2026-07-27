@@ -124,6 +124,38 @@ export async function getIncidentStats(icao) {
 }
 
 /**
+ * @param {{incident_type: string, description: string, severity: string, airport_area: string, icao_code?: string}} payload
+ */
+export async function createIncident(payload) {
+  return apiRequest("/api/incidents", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * @param {string} incidentId
+ * @param {{status?: string, description?: string, airport_area?: string}} payload
+ */
+export async function updateIncident(incidentId, payload) {
+  return apiRequest(`/api/incidents/${encodeURIComponent(incidentId)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * @param {string} incidentId
+ */
+export async function deleteIncident(incidentId) {
+  return apiRequest(`/api/incidents/${encodeURIComponent(incidentId)}`, {
+    method: "DELETE",
+  });
+}
+
+/**
  * @param {string} message
  * @param {string|null} [sessionId]
  */
