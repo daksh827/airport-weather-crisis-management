@@ -113,14 +113,72 @@ export async function getRecommendations(icao) {
   return apiRequest(`/api/recommendations${query}`);
 }
 
-export async function getIncidents(icao) {
-  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+/**
+ * @param {string} [icao]
+ * @param {Record<string, string|undefined|null>} [filters]
+ */
+export async function getIncidents(icao, filters = {}) {
+  const params = new URLSearchParams();
+  if (icao) params.set("icao", icao);
+  Object.entries(filters || {}).forEach(([key, value]) => {
+    if (value != null && String(value).trim() !== "") {
+      params.set(key, String(value).trim());
+    }
+  });
+  const query = params.toString() ? `?${params.toString()}` : "";
   return apiRequest(`/api/incidents${query}`);
 }
 
 export async function getIncidentStats(icao) {
   const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
   return apiRequest(`/api/incidents/stats${query}`);
+}
+
+export async function getIncidentHistory(icao) {
+  const query = icao ? `?icao=${encodeURIComponent(icao)}` : "";
+  return apiRequest(`/api/incidents/history${query}`);
+}
+
+/**
+ * @param {string} incidentId
+ */
+export async function getIncidentTimeline(incidentId) {
+  return apiRequest(`/api/incidents/timeline/${encodeURIComponent(incidentId)}`);
+}
+
+/**
+ * Trigger CSV download of incident history.
+ * @param {string} [icao]
+ */
+export async function exportIncidentHistory(icao) {
+  const params = new URLSearchParams();
+  if (icao) params.set("icao", icao);
+  const query = params.toString() ? `?${params.toString()}` : "";
+  const response = await fetch(`/api/incidents/export${query}`, {
+    headers: { Accept: "text/csv" },
+  });
+  if (!response.ok) {
+    throw new Error(`Export failed (${response.status})`);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const match = /filename="?([^"]+)"?/i.exec(disposition);
+  const filename =
+    match?.[1] ||
+    `${icao || "VIDP"}_Incident_Report_${new Date()
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, "")}.csv`;
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+  return { filename };
 }
 
 /**

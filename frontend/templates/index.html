@@ -285,7 +285,7 @@
         </form>
       </section>
 
-      <!-- Incident & Crisis Management (Phase 6A) -->
+      <!-- Incident & Crisis Management (Phase 6A–6C) -->
       <section class="panel incident-panel" id="incident-panel" aria-labelledby="incident-heading">
         <div class="panel-header">
           <div>
@@ -293,6 +293,7 @@
             <h2 id="incident-heading">Incident &amp; Crisis Management</h2>
           </div>
           <div class="panel-actions">
+            <button type="button" class="btn btn-ghost" id="btn-export-incidents">Export CSV</button>
             <button type="button" class="btn btn-primary" id="btn-create-incident">Create Incident</button>
           </div>
         </div>
@@ -318,6 +319,70 @@
             <span class="incident-stat-label">Closed Today</span>
             <span class="incident-stat-value" id="incident-stat-closed">--</span>
           </article>
+          <article class="incident-stat-card">
+            <span class="incident-stat-label">Avg Resolution</span>
+            <span class="incident-stat-value incident-stat-value-sm" id="incident-stat-avg-resolution">--</span>
+          </article>
+          <article class="incident-stat-card">
+            <span class="incident-stat-label">Fastest Resolution</span>
+            <span class="incident-stat-value incident-stat-value-sm" id="incident-stat-fastest">--</span>
+          </article>
+          <article class="incident-stat-card">
+            <span class="incident-stat-label">Longest Resolution</span>
+            <span class="incident-stat-value incident-stat-value-sm" id="incident-stat-longest">--</span>
+          </article>
+        </div>
+
+        <div class="incident-toolbar" id="incident-toolbar">
+          <div class="incident-search-wrap">
+            <label class="sr-only" for="incident-search">Search incidents</label>
+            <input
+              type="search"
+              id="incident-search"
+              class="incident-input incident-search"
+              placeholder="Search ID, type, area, department, description…"
+              autocomplete="off"
+            />
+          </div>
+          <div class="incident-filter-group">
+            <label class="sr-only" for="incident-filter-severity">Filter severity</label>
+            <select id="incident-filter-severity" class="incident-input incident-filter">
+              <option value="">All Severities</option>
+              <option>Level 1</option>
+              <option>Level 2</option>
+              <option>Level 3</option>
+              <option>Low</option>
+              <option>Medium</option>
+              <option>High</option>
+              <option>Critical</option>
+            </select>
+            <label class="sr-only" for="incident-filter-status">Filter status</label>
+            <select id="incident-filter-status" class="incident-input incident-filter">
+              <option value="">All Statuses</option>
+              <option>Open</option>
+              <option>Assigned</option>
+              <option>In Progress</option>
+              <option>Resolved</option>
+              <option>Closed</option>
+            </select>
+            <label class="sr-only" for="incident-filter-department">Filter department</label>
+            <select id="incident-filter-department" class="incident-input incident-filter">
+              <option value="">All Departments</option>
+            </select>
+            <label class="sr-only" for="incident-filter-type">Filter type</label>
+            <select id="incident-filter-type" class="incident-input incident-filter">
+              <option value="">All Types</option>
+            </select>
+            <label class="sr-only" for="incident-sort">Sort incidents</label>
+            <select id="incident-sort" class="incident-input incident-filter">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="highest_severity">Highest Severity</option>
+              <option value="lowest_severity">Lowest Severity</option>
+              <option value="status">Status</option>
+              <option value="created_time">Created Time</option>
+            </select>
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -340,6 +405,30 @@
             </tbody>
           </table>
         </div>
+
+        <details class="incident-history" id="incident-history">
+          <summary class="incident-history-summary">
+            <span>Incident History</span>
+            <span class="incident-history-count mono" id="incident-history-count">0</span>
+          </summary>
+          <div class="table-wrap">
+            <table class="incident-table incident-history-table" id="incident-history-table">
+              <thead>
+                <tr>
+                  <th>Incident ID</th>
+                  <th>Incident Type</th>
+                  <th>Resolution Time</th>
+                  <th>Closed Time</th>
+                  <th>Department</th>
+                  <th>Final Status</th>
+                </tr>
+              </thead>
+              <tbody id="incident-history-body">
+                <tr><td colspan="6" class="table-empty">No resolved or closed incidents.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
       </section>
 
       <!-- Phase 6B — Create / Edit Incident Modal -->
@@ -474,6 +563,38 @@
             </div>
           </form>
         </div>
+      </div>
+
+      <!-- Phase 6C — Incident Timeline Drawer -->
+      <div
+        class="incident-timeline-drawer"
+        id="incident-timeline-drawer"
+        hidden
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="incident-timeline-title"
+      >
+        <div class="incident-modal-backdrop" data-timeline-close></div>
+        <aside class="incident-timeline-panel">
+          <div class="incident-modal-header">
+            <div>
+              <p class="panel-kicker">Incident Timeline</p>
+              <h3 id="incident-timeline-title">Timeline</h3>
+              <p class="incident-timeline-meta mono" id="incident-timeline-meta"></p>
+            </div>
+            <button
+              type="button"
+              class="btn btn-ghost incident-modal-close"
+              data-timeline-close
+              aria-label="Close timeline"
+            >
+              ✕
+            </button>
+          </div>
+          <ol class="incident-timeline-list" id="incident-timeline-list">
+            <li class="incident-timeline-empty">Loading timeline…</li>
+          </ol>
+        </aside>
       </div>
 
       <!-- AOCC Recommendations -->

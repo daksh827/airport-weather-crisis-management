@@ -1,11 +1,14 @@
 /**
- * Phase 6A/6B — Incident & Crisis Management panel with create / edit / delete workflow.
+ * Phase 6A–6C — Incident Management: CRUD, timeline, filters, history, export.
  */
 
 import {
   createIncident,
   deleteIncident,
+  exportIncidentHistory,
+  getIncidentHistory,
   getIncidentStats,
+  getIncidentTimeline,
   getIncidents,
   updateIncident,
 } from "./api.js";
@@ -20,6 +23,8 @@ const STATUS_OPTIONS = [
 
 /** @type {Map<string, object>} */
 const incidentCache = new Map();
+
+let searchDebounceTimer = null;
 
 /**
  * @param {unknown} value
@@ -41,6 +46,17 @@ function formatDateTime(value) {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
   return date.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, " UTC");
+}
+
+/**
+ * Compact clock for timeline (HH:MM UTC).
+ * @param {string|Date|null|undefined} value
+ */
+function formatClock(value) {
+  if (!value) return "--:--";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toISOString().slice(11, 16);
 }
 
 /**
@@ -88,6 +104,56 @@ function statusSelectHtml(current) {
   return `<select class="incident-status-select" data-action="status" aria-label="Change status">${options}</select>`;
 }
 
+function getFilterState() {
+  return {
+    search: document.getElementById("incident-search")?.value || "",
+    severity: document.getElementById("incident-filter-severity")?.value || "",
+    status: document.getElementById("incident-filter-status")?.value || "",
+    department:
+      document.getElementById("incident-filter-department")?.value || "",
+    incident_type: document.getElementById("incident-filter-type")?.value || "",
+    sort: document.getElementById("incident-sort")?.value || "newest",
+  };
+}
+
+/**
+ * @param {HTMLSelectElement|null} select
+ * @param {string[]} values
+ * @param {string} allLabel
+ */
+function populateFilterOptions(select, values, allLabel) {
+  if (!select) return;
+  const current = select.value;
+  const unique = [...new Set(values.filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+  select.innerHTML = `<option value="">${escapeHtml(allLabel)}</option>${unique
+    .map(
+      (value) =>
+        `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`
+    )
+    .join("")}`;
+  if (current && unique.includes(current)) {
+    select.value = current;
+  }
+}
+
+/**
+ * @param {object[]} items
+ */
+function refreshDynamicFilters(items) {
+  populateFilterOptions(
+    document.getElementById("incident-filter-department"),
+    items.map((i) => i.assigned_department),
+    "All Departments"
+  );
+  populateFilterOptions(
+    document.getElementById("incident-filter-type"),
+    items.map((i) => i.incident_type),
+    "All Types"
+  );
+}
+
 /**
  * @param {object} stats
  */
@@ -102,6 +168,9 @@ export function renderIncidentStats(stats) {
   setText("incident-stat-progress", stats.in_progress ?? "--");
   setText("incident-stat-resolved", stats.resolved_today ?? "--");
   setText("incident-stat-closed", stats.closed_today ?? "--");
+  setText("incident-stat-avg-resolution", stats.avg_resolution_time ?? "--");
+  setText("incident-stat-fastest", stats.fastest_resolution ?? "--");
+  setText("incident-stat-longest", stats.longest_resolution ?? "--");
 }
 
 /**
@@ -119,7 +188,7 @@ export function renderIncidentTable(data) {
 
   if (!items.length) {
     body.innerHTML =
-      '<tr><td colspan="9" class="table-empty">No incidents recorded.</td></tr>';
+      '<tr><td colspan="9" class="table-empty">No incidents match the current filters.</td></tr>';
     return;
   }
 
@@ -141,6 +210,7 @@ export function renderIncidentTable(data) {
           <td>
             <div class="incident-actions">
               ${statusSelectHtml(status)}
+              <button type="button" class="btn btn-ghost incident-action-btn" data-action="timeline">View Timeline</button>
               <button type="button" class="btn btn-ghost incident-action-btn" data-action="edit">Edit</button>
               <button type="button" class="btn btn-ghost incident-action-btn is-danger" data-action="delete">Delete</button>
             </div>
@@ -148,6 +218,81 @@ export function renderIncidentTable(data) {
         </tr>
       `;
     })
+    .join("");
+}
+
+/**
+ * @param {object} data
+ */
+export function renderIncidentHistory(data) {
+  const body = document.getElementById("incident-history-body");
+  const countEl = document.getElementById("incident-history-count");
+  const items = Array.isArray(data.items) ? data.items : [];
+  if (countEl) countEl.textContent = String(items.length);
+
+  if (!body) return;
+  if (!items.length) {
+    body.innerHTML =
+      '<tr><td colspan="6" class="table-empty">No resolved or closed incidents.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = items
+    .map((item) => {
+      const status = item.final_status || "—";
+      return `
+        <tr>
+          <td class="mono">${escapeHtml(item.incident_id)}</td>
+          <td>${escapeHtml(item.incident_type)}</td>
+          <td class="mono">${escapeHtml(formatDateTime(item.resolution_time))}</td>
+          <td class="mono">${escapeHtml(formatDateTime(item.closed_time))}</td>
+          <td>${escapeHtml(item.assigned_department)}</td>
+          <td><span class="incident-pill ${statusClass(status)}">${escapeHtml(status)}</span></td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+/**
+ * @param {object} data
+ */
+function renderTimeline(data) {
+  const list = document.getElementById("incident-timeline-list");
+  const title = document.getElementById("incident-timeline-title");
+  const meta = document.getElementById("incident-timeline-meta");
+  if (title) {
+    title.textContent = data.incident_id
+      ? `${data.incident_id} Timeline`
+      : "Timeline";
+  }
+  if (meta) {
+    meta.textContent = [
+      data.incident_type,
+      data.assigned_department,
+      data.status,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+  if (!list) return;
+
+  const events = Array.isArray(data.events) ? data.events : [];
+  if (!events.length) {
+    list.innerHTML =
+      '<li class="incident-timeline-empty">No timeline events recorded.</li>';
+    return;
+  }
+
+  list.innerHTML = events
+    .map(
+      (event) => `
+      <li class="incident-timeline-item">
+        <span class="incident-timeline-time">${escapeHtml(formatClock(event.timestamp))} UTC</span>
+        <p class="incident-timeline-message">${escapeHtml(event.message)}</p>
+      </li>
+    `
+    )
     .join("");
 }
 
@@ -167,7 +312,8 @@ export async function loadIncidents() {
   const panel = document.getElementById("incident-panel");
   panel?.classList.add("is-loading");
   try {
-    const response = await getIncidents();
+    const filters = getFilterState();
+    const response = await getIncidents(undefined, filters);
     renderIncidentTable(response.data || {});
     return response.data;
   } catch (error) {
@@ -183,9 +329,37 @@ export async function loadIncidents() {
   }
 }
 
+export async function loadIncidentHistory() {
+  try {
+    const response = await getIncidentHistory();
+    renderIncidentHistory(response.data || {});
+    return response.data;
+  } catch (error) {
+    console.error("Incident history load failed:", error);
+    renderIncidentHistory({ items: [], total: 0 });
+    return null;
+  }
+}
+
+/**
+ * Load unfiltered list once to populate department/type filter options.
+ */
+async function loadFilterOptionSources() {
+  try {
+    const response = await getIncidents();
+    refreshDynamicFilters(response.data?.items || []);
+  } catch (error) {
+    console.error("Filter option load failed:", error);
+  }
+}
+
 export async function loadIncidentPanel() {
-  await loadIncidentStats();
-  await loadIncidents();
+  await loadFilterOptionSources();
+  await Promise.all([
+    loadIncidentStats(),
+    loadIncidents(),
+    loadIncidentHistory(),
+  ]);
 }
 
 function getModalEls() {
@@ -265,7 +439,6 @@ function validateCreateForm() {
 }
 
 /**
- * Ensure a select can show an existing value (for legacy mock areas/types).
  * @param {HTMLSelectElement|null} select
  * @param {string} value
  */
@@ -334,8 +507,45 @@ function closeModal() {
   form?.reset();
 }
 
+function closeTimelineDrawer() {
+  const drawer = document.getElementById("incident-timeline-drawer");
+  if (!drawer) return;
+  drawer.hidden = true;
+  document.body.classList.remove("incident-modal-open");
+}
+
+async function openTimelineDrawer(incidentId) {
+  const drawer = document.getElementById("incident-timeline-drawer");
+  const list = document.getElementById("incident-timeline-list");
+  if (!drawer) return;
+
+  drawer.hidden = false;
+  document.body.classList.add("incident-modal-open");
+  if (list) {
+    list.innerHTML =
+      '<li class="incident-timeline-empty">Loading timeline…</li>';
+  }
+
+  try {
+    const response = await getIncidentTimeline(incidentId);
+    renderTimeline(response.data || {});
+  } catch (error) {
+    console.error("Timeline load failed:", error);
+    if (list) {
+      list.innerHTML = `<li class="incident-timeline-empty">${escapeHtml(
+        error?.message || "Unable to load timeline."
+      )}</li>`;
+    }
+  }
+}
+
 async function refreshIncidentsLive() {
-  await Promise.all([loadIncidentStats(), loadIncidents()]);
+  await loadFilterOptionSources();
+  await Promise.all([
+    loadIncidentStats(),
+    loadIncidents(),
+    loadIncidentHistory(),
+  ]);
 }
 
 async function handleFormSubmit(event) {
@@ -414,24 +624,56 @@ async function handleDelete(incidentId) {
   }
 }
 
+async function handleExport() {
+  const button = document.getElementById("btn-export-incidents");
+  if (button) button.disabled = true;
+  try {
+    await exportIncidentHistory();
+  } catch (error) {
+    console.error("Export failed:", error);
+    window.alert(error?.message || "Unable to export incident history.");
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+function scheduleFilterRefresh() {
+  if (searchDebounceTimer) window.clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = window.setTimeout(() => {
+    loadIncidents();
+  }, 180);
+}
+
 /**
- * Wire Create Incident modal, table actions, and form validation.
+ * Wire Create Incident modal, filters, timeline, history, and export.
  */
 export function initIncidentControls() {
   const createBtn = document.getElementById("btn-create-incident");
+  const exportBtn = document.getElementById("btn-export-incidents");
   const els = getModalEls();
   const table = document.getElementById("incident-table");
+  const drawer = document.getElementById("incident-timeline-drawer");
 
   createBtn?.addEventListener("click", () => openModal("create"));
+  exportBtn?.addEventListener("click", handleExport);
 
   els.modal
     ?.querySelectorAll("[data-incident-modal-close]")
     .forEach((node) => node.addEventListener("click", closeModal));
 
+  drawer
+    ?.querySelectorAll("[data-timeline-close]")
+    .forEach((node) => node.addEventListener("click", closeTimelineDrawer));
+
   els.form?.addEventListener("submit", handleFormSubmit);
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && els.modal && !els.modal.hidden) {
+    if (event.key !== "Escape") return;
+    if (drawer && !drawer.hidden) {
+      closeTimelineDrawer();
+      return;
+    }
+    if (els.modal && !els.modal.hidden) {
       closeModal();
     }
   });
@@ -440,6 +682,21 @@ export function initIncidentControls() {
     const input = document.getElementById(`incident-${key}`);
     input?.addEventListener("input", () => setFieldError(key, ""));
     input?.addEventListener("change", () => setFieldError(key, ""));
+  });
+
+  const search = document.getElementById("incident-search");
+  search?.addEventListener("input", scheduleFilterRefresh);
+
+  [
+    "incident-filter-severity",
+    "incident-filter-status",
+    "incident-filter-department",
+    "incident-filter-type",
+    "incident-sort",
+  ].forEach((id) => {
+    document.getElementById(id)?.addEventListener("change", () => {
+      loadIncidents();
+    });
   });
 
   table?.addEventListener("change", (event) => {
@@ -462,6 +719,10 @@ export function initIncidentControls() {
     if (!incidentId) return;
 
     const action = button.getAttribute("data-action");
+    if (action === "timeline") {
+      openTimelineDrawer(incidentId);
+      return;
+    }
     if (action === "edit") {
       const incident = incidentCache.get(incidentId);
       if (incident) openModal("edit", incident);

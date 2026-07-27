@@ -1,4 +1,4 @@
-"""Domain models for AOCC Incident & Crisis Management (Phase 6A/6B)."""
+"""Domain models for AOCC Incident & Crisis Management (Phase 6A–6C)."""
 
 from __future__ import annotations
 
@@ -32,6 +32,14 @@ class IncidentStatus(str, Enum):
     CLOSED = "Closed"
 
 
+class TimelineEvent(BaseModel):
+    """Single timeline entry for an incident."""
+
+    timestamp: datetime
+    message: str
+    event_type: str = "info"
+
+
 class Incident(BaseModel):
     """Single AOCC incident record."""
 
@@ -45,3 +53,6 @@ class Incident(BaseModel):
     last_updated: datetime
     description: Optional[str] = None
     icao_code: str = "VIDP"
+    timeline: list[TimelineEvent] = Field(default_factory=list)
+    resolved_time: Optional[datetime] = None
+    closed_time: Optional[datetime] = None
