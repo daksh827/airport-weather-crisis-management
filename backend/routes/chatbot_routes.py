@@ -7,6 +7,7 @@ import logging
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from backend.schemas import ChatRequest, success_response
+from backend.services.assistant_service import AssistantService, get_assistant_service
 from backend.services.rag_service import RAGService, get_rag_service
 
 logger = logging.getLogger(__name__)
@@ -17,11 +18,11 @@ router = APIRouter(tags=["Chatbot"])
 @router.post("/chat")
 def chat(
     body: ChatRequest,
-    rag_service: RAGService = Depends(get_rag_service),
+    assistant_service: AssistantService = Depends(get_assistant_service),
 ):
-    """Send a message to the AOCC AI assistant (mock provider)."""
+    """AOCC AI Assistant — answers from live operational data (Phase 7A)."""
     try:
-        data = rag_service.chat(body.message, session_id=body.session_id)
+        data = assistant_service.chat(body.message, session_id=body.session_id)
     except Exception as exc:  # pragma: no cover - defensive
         logger.exception("Chat handling failed")
         raise HTTPException(
@@ -36,7 +37,7 @@ async def upload_document(
     file: UploadFile = File(..., description="SOP or contingency document for future RAG"),
     rag_service: RAGService = Depends(get_rag_service),
 ):
-    """Upload a document for future RAG indexing (storage only in Phase 1)."""
+    """Upload a document for future RAG indexing (storage only until Phase 7B)."""
     if not file.filename:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

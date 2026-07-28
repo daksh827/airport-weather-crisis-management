@@ -1,6 +1,7 @@
 """Service layer — business orchestration for weather, severity, RAG, and ops."""
 
 from backend.services.alert_service import AlertService, get_alert_service
+from backend.services.assistant_service import AssistantService, get_assistant_service
 from backend.services.flight_service import FlightOperationsService, get_flight_operations_service
 from backend.services.ground_service import GroundOperationsService, get_ground_operations_service
 from backend.services.impact_service import ImpactService, get_impact_service
@@ -21,6 +22,7 @@ __all__ = [
     "WeatherService",
     "SeverityService",
     "RAGService",
+    "AssistantService",
     "AlertService",
     "ImpactService",
     "NotificationService",
@@ -34,6 +36,7 @@ __all__ = [
     "get_weather_service",
     "get_severity_service",
     "get_rag_service",
+    "get_assistant_service",
     "get_alert_service",
     "get_impact_service",
     "get_notification_service",
