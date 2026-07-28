@@ -13,6 +13,8 @@ uploads/*
 !uploads/.gitkeep
 vectorstore/*
 !vectorstore/.gitkeep
+backend/vector_db/*
+!backend/vector_db/.gitkeep
 *.log
 .DS_Store
 Thumbs.db

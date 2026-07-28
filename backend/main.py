@@ -24,9 +24,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.config import (
     DOCUMENTS_DIR,
+    KNOWLEDGE_BASE_DIR,
     STATIC_DIR,
     TEMPLATES_DIR,
     UPLOADS_DIR,
+    VECTOR_DB_DIR,
     VECTORSTORE_DIR,
     Settings,
     get_settings,
@@ -55,7 +57,14 @@ logger = logging.getLogger("aocc")
 
 
 def _ensure_runtime_directories() -> None:
-    for path in (DOCUMENTS_DIR, UPLOADS_DIR, VECTORSTORE_DIR, STATIC_DIR / "images"):
+    for path in (
+        DOCUMENTS_DIR,
+        UPLOADS_DIR,
+        VECTORSTORE_DIR,
+        VECTOR_DB_DIR,
+        KNOWLEDGE_BASE_DIR,
+        STATIC_DIR / "images",
+    ):
         path.mkdir(parents=True, exist_ok=True)
 
 
@@ -72,6 +81,22 @@ async def lifespan(app: FastAPI):
         settings.weather_provider,
         settings.chat_provider,
     )
+
+    # Phase 7B — ensure Chroma knowledge index exists (build only if missing)
+    try:
+        from backend.rag.rag_service import get_knowledge_rag_service
+
+        status = get_knowledge_rag_service(settings).ensure_indexed()
+        logger.info(
+            "RAG ready indexed=%s documents=%s chunks=%s model=%s",
+            status.get("indexed"),
+            status.get("documents"),
+            status.get("chunks"),
+            status.get("embedding_model"),
+        )
+    except Exception:
+        logger.exception("RAG startup indexing failed; assistant will degrade gracefully")
+
     yield
     logger.info("Shutting down AOCC application")
 

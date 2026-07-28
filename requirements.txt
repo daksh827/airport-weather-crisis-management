@@ -1,5 +1,5 @@
 # AOCC — AI-Powered Airport Weather Crisis Management System
-# Phase 1 runtime dependencies (compatible with Python 3.11–3.14)
+# Compatible with Python 3.11–3.14
 
 fastapi>=0.115.12,<0.140
 uvicorn[standard]>=0.34.2,<0.40
@@ -12,9 +12,13 @@ aiofiles>=24.1.0,<25
 httpx>=0.28.1,<0.29
 starlette>=0.46.2,<0.50
 
-# Reserved for future Gemini + LangChain + RAG (not wired in Phase 1)
-# langchain
-# langchain-google-genai
-# faiss-cpu
-# sentence-transformers
-# google-generativeai
+# Phase 7B — RAG + Gemini
+google-generativeai>=0.8.0,<0.9
+chromadb>=0.5.0,<2
+langchain-text-splitters>=0.3.0,<2
+langchain-core>=0.3.0,<2
+docx2txt>=0.8
+pypdf>=5.0.0,<7
+python-docx>=1.1.0,<2
+# Optional local embedding fallback (install if Gemini embeddings unavailable)
+# sentence-transformers>=3.0.0

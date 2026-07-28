@@ -12,6 +12,8 @@ STATIC_DIR = FRONTEND_DIR / "static"
 DOCUMENTS_DIR = BASE_DIR / "documents"
 UPLOADS_DIR = BASE_DIR / "uploads"
 VECTORSTORE_DIR = BASE_DIR / "vectorstore"
+KNOWLEDGE_BASE_DIR = Path(__file__).resolve().parent / "knowledge_base"
+VECTOR_DB_DIR = Path(__file__).resolve().parent / "vector_db"
 
 
 class Settings(BaseSettings):
@@ -41,8 +43,17 @@ class Settings(BaseSettings):
     # Weather provider switch: "mock" | "tomorrow_io" (future)
     weather_provider: str = "mock"
 
-    # Chat provider switch: "mock" | "gemini" (future)
+    # Chat provider switch: "mock" | "gemini" | "aocc" (live + RAG)
     chat_provider: str = "mock"
+
+    # Phase 7B RAG
+    rag_chunk_size: int = 1000
+    rag_chunk_overlap: int = 200
+    rag_top_k: int = 5
+    rag_collection_name: str = "aocc_knowledge_base"
+    gemini_model: str = "gemini-2.0-flash"
+    gemini_embedding_model: str = "models/gemini-embedding-001"
+    rag_min_score: float = 0.15
 
     log_level: str = "INFO"
     cors_origins: str = "*"

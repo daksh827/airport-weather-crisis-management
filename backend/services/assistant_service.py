@@ -1,4 +1,4 @@
-"""AOCC AI Assistant — Phase 7A live operational intelligence (no RAG)."""
+"""AOCC AI Assistant — Phase 7A live ops + Phase 7B RAG/Gemini."""
 
 from __future__ import annotations
 
@@ -40,11 +40,48 @@ from backend.services.weather_service import WeatherService, get_weather_service
 logger = logging.getLogger(__name__)
 
 _UNKNOWN_REPLY = (
-    "I don't currently have operational data for that request.\n\n"
-    "Phase 7B will extend my knowledge using airport SOP documents."
+    "I don't currently have operational data for that request. "
+    "Try asking about live weather, flights, runway, terminals, ground ops, "
+    "incidents, KPIs, recommendations, or procedures from the Airport Weather "
+    "Crisis Management Manual."
 )
 
 _HIGH_SEVERITIES = {"high", "critical", "level 3"}
+
+_KNOWLEDGE_TOKENS = (
+    "procedure",
+    "protocol",
+    "sop",
+    "manual",
+    "what should aocc",
+    "what should the aocc",
+    "during dense fog",
+    "dense fog",
+    "runway closure",
+    "passenger communication",
+    "thunderstorm response",
+    "thunderstorm",
+    "how should airlines",
+    "airline coordination",
+    "when should level",
+    "level 3 be declared",
+    "declare level",
+    "contingency",
+    "guidance in the manual",
+    "according to the manual",
+    "explain ",
+)
+
+_HYBRID_TOKENS = (
+    "why is the airport",
+    "why is airport",
+    "operating with restrictions",
+    "why level",
+    "why are we",
+    "why are these",
+    "based on current",
+    "given current",
+)
 
 
 class Intent(str, Enum):
@@ -64,7 +101,14 @@ class Intent(str, Enum):
     RECOMMENDATIONS = "recommendations"
     IMPACT = "impact"
     SUMMARY = "summary"
+    KNOWLEDGE = "knowledge"
     UNKNOWN = "unknown"
+
+
+class RouteMode(str, Enum):
+    LIVE = "live"
+    KNOWLEDGE = "knowledge"
+    HYBRID = "hybrid"
 
 
 def _utc_now() -> datetime:
@@ -81,28 +125,16 @@ def detect_intent(message: str) -> Intent:
     if not text:
         return Intent.UNKNOWN
 
-    # Document/RAG queries are deferred to Phase 7B (avoid bare "rag" — matches "average")
-    if _contains_any(
-        text,
-        (
-            "sop",
-            "document",
-            "manual",
-            "pdf",
-            "procedure",
-            "checklist file",
-            "vector",
-            "embedding",
-        ),
-    ) or re.search(r"\brag\b", text):
-        return Intent.UNKNOWN
-
     if _contains_any(text, ("hello", "hi ", "hi,", "hey", "good morning", "good evening")):
         return Intent.GREETING
     if text in {"hi", "hello", "hey"}:
         return Intent.GREETING
     if _contains_any(text, ("help", "what can you", "commands", "capabilities")):
         return Intent.HELP
+
+    # Knowledge / SOP style questions (Phase 7B)
+    if _contains_any(text, _KNOWLEDGE_TOKENS) or re.search(r"\brag\b", text):
+        return Intent.KNOWLEDGE
 
     if _contains_any(
         text,
@@ -262,8 +294,66 @@ def detect_intent(message: str) -> Intent:
     return Intent.UNKNOWN
 
 
+def detect_route(message: str, intent: Intent) -> RouteMode:
+    """Decide whether to use live data, knowledge retrieval, or both."""
+    text = message.strip().lower()
+
+    if intent in {Intent.GREETING, Intent.HELP}:
+        return RouteMode.LIVE
+
+    if intent == Intent.KNOWLEDGE:
+        if _contains_any(text, _HYBRID_TOKENS) or intent_needs_live_snapshot(text):
+            return RouteMode.HYBRID
+        return RouteMode.KNOWLEDGE
+
+    if _contains_any(text, _HYBRID_TOKENS):
+        return RouteMode.HYBRID
+
+    if intent == Intent.UNKNOWN:
+        # Fall back to knowledge search for open procedural questions
+        if "?" in text or _contains_any(text, ("how ", "what ", "when ", "explain")):
+            return RouteMode.KNOWLEDGE
+        return RouteMode.LIVE
+
+    if intent in {
+        Intent.SEVERITY,
+        Intent.RECOMMENDATIONS,
+        Intent.SUMMARY,
+        Intent.IMPACT,
+    } and _contains_any(
+        text,
+        (
+            "why",
+            "procedure",
+            "should",
+            "protocol",
+            "restrictions",
+            "declare",
+            "response",
+        ),
+    ):
+        return RouteMode.HYBRID
+
+    return RouteMode.LIVE
+
+
+def intent_needs_live_snapshot(text: str) -> bool:
+    return _contains_any(
+        text,
+        (
+            "current",
+            "right now",
+            "today",
+            "live",
+            "level 2",
+            "level 3",
+            "restrictions",
+        ),
+    )
+
+
 class AssistantService:
-    """Live-data AOCC assistant that reuses existing operational services."""
+    """Live-data + RAG AOCC assistant that reuses existing operational services."""
 
     def __init__(
         self,
@@ -279,6 +369,7 @@ class AssistantService:
         kpi_service: Optional[AirportKPIService] = None,
         incident_service: Optional[IncidentService] = None,
         recommendation_service: Optional[RecommendationService] = None,
+        knowledge_rag_service=None,
     ) -> None:
         self.settings = settings or get_settings()
         self.weather_service = weather_service or get_weather_service()
@@ -294,21 +385,76 @@ class AssistantService:
         self.recommendation_service = (
             recommendation_service or get_recommendation_service()
         )
+        self._knowledge_rag_service = knowledge_rag_service
+
+    @property
+    def knowledge_rag_service(self):
+        if self._knowledge_rag_service is None:
+            from backend.rag.rag_service import get_knowledge_rag_service
+
+            self._knowledge_rag_service = get_knowledge_rag_service(self.settings)
+        return self._knowledge_rag_service
 
     def chat(self, message: str, session_id: Optional[str] = None) -> dict:
         intent = detect_intent(message)
-        reply = self._answer(intent, message)
-        logger.info("Assistant intent=%s message=%r", intent.value, message[:80])
+        mode = detect_route(message, intent)
+        provider = "aocc-live"
+        sources: list[str] = []
+        retrieved_chunks = 0
+
+        try:
+            if mode == RouteMode.LIVE:
+                reply = self._answer_live(intent, message)
+                provider = "aocc-live"
+            elif mode == RouteMode.KNOWLEDGE:
+                rag = self.knowledge_rag_service.answer(message)
+                reply = rag["reply"]
+                provider = rag.get("provider") or "aocc-rag"
+                sources = rag.get("sources") or []
+                retrieved_chunks = int(rag.get("retrieved_chunks") or 0)
+            else:
+                live_context = self._build_live_context(intent, message)
+                rag = self.knowledge_rag_service.answer(
+                    message,
+                    live_context=live_context,
+                )
+                reply = rag["reply"]
+                provider = "aocc-hybrid"
+                sources = rag.get("sources") or []
+                retrieved_chunks = int(rag.get("retrieved_chunks") or 0)
+        except Exception:
+            logger.exception("Assistant failed intent=%s mode=%s", intent.value, mode.value)
+            if mode == RouteMode.LIVE:
+                reply = (
+                    "I encountered an issue retrieving live operational data. "
+                    "Please retry in a moment."
+                )
+            else:
+                reply = (
+                    "I encountered an issue retrieving manual guidance. "
+                    "Please retry in a moment."
+                )
+
+        logger.info(
+            "Assistant intent=%s mode=%s provider=%s message=%r",
+            intent.value,
+            mode.value,
+            provider,
+            message[:80],
+        )
         return {
             "reply": reply,
-            "provider": "aocc-live",
-            "context_used": intent != Intent.UNKNOWN,
+            "provider": provider,
+            "context_used": mode != RouteMode.LIVE or intent != Intent.UNKNOWN,
             "intent": intent.value,
+            "route": mode.value,
+            "sources": sources,
+            "retrieved_chunks": retrieved_chunks,
             "timestamp": _utc_now().isoformat(),
             "session_id": session_id or str(uuid.uuid4()),
         }
 
-    def _answer(self, intent: Intent, message: str) -> str:
+    def _answer_live(self, intent: Intent, message: str) -> str:
         handlers = {
             Intent.GREETING: self._reply_greeting,
             Intent.HELP: self._reply_help,
@@ -330,14 +476,29 @@ class AssistantService:
         handler = handlers.get(intent)
         if handler is None:
             return _UNKNOWN_REPLY
+        return handler(message)
+
+    def _build_live_context(self, intent: Intent, message: str) -> str:
+        """Compact live snapshot for hybrid Gemini prompts."""
         try:
-            return handler(message)
+            if intent in {Intent.SEVERITY, Intent.SUMMARY, Intent.KNOWLEDGE, Intent.UNKNOWN}:
+                return self._reply_summary(message)
+            if intent == Intent.RECOMMENDATIONS:
+                return self._reply_recommendations(message)
+            if intent == Intent.WEATHER:
+                return self._reply_weather(message)
+            if intent == Intent.VISIBILITY:
+                return self._reply_visibility(message)
+            if intent == Intent.FLIGHTS:
+                return self._reply_flights(message)
+            if intent == Intent.RUNWAY:
+                return self._reply_runway(message)
+            if intent == Intent.IMPACT:
+                return self._reply_impact(message)
+            return self._reply_summary(message)
         except Exception:
-            logger.exception("Assistant failed for intent=%s", intent.value)
-            return (
-                "I encountered an issue retrieving live operational data. "
-                "Please retry in a moment."
-            )
+            logger.exception("Failed building live context for hybrid answer")
+            return "Live operational context temporarily unavailable."
 
     def _reply_greeting(self, _message: str) -> str:
         weather = self.weather_service.get_current_weather()
@@ -347,23 +508,25 @@ class AssistantService:
             f"({weather.airport_name}).\n\n"
             f"Current severity: {severity.title}\n"
             f"Weather: {weather.weather_description}\n\n"
-            "Ask about weather, flights, runway, terminals, ground ops, "
-            "incidents, KPIs, or recommendations."
+            "Ask about live operations or procedures from the Airport Weather "
+            "Crisis Management Manual."
         )
 
     def _reply_help(self, _message: str) -> str:
         return (
-            "I answer from live AOCC operational data.\n\n"
-            "Examples:\n"
+            "I answer from live AOCC operational data and the Airport Weather "
+            "Crisis Management Manual (RAG).\n\n"
+            "Live examples:\n"
             "• What is the current weather?\n"
             "• How many delayed flights?\n"
             "• Current runway status?\n"
-            "• Terminal 3 passenger load?\n"
-            "• How many fuel trucks are available?\n"
             "• How many open incidents?\n"
-            "• Today's passenger count\n"
-            "• What actions are recommended?\n"
-            "• Give me an airport summary."
+            "• Give me an airport summary.\n\n"
+            "Manual / procedure examples:\n"
+            "• What should AOCC do during dense fog?\n"
+            "• What is the runway closure procedure?\n"
+            "• Explain thunderstorm response.\n"
+            "• When should Level 3 be declared?"
         )
 
     def _reply_weather(self, _message: str) -> str:
